@@ -7,8 +7,8 @@ class Category(db.Model):
     name = db.Column(db.String(100), nullable=False)
     description = db.Column(db.Text, nullable=True)
     
-    # Relacionamento com atividades - corrigido para usar a chave estrangeira
-    activities = db.relationship('Activity', backref='category_rel', lazy=True)
+    # Relacionamento com atividades - corrigido para usar backref
+    activities = db.relationship('Activity', backref='category', lazy=True)
     
     def __repr__(self):
         return f'<Category {self.name}>'
