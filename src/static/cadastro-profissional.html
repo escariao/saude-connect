@@ -103,6 +103,28 @@
         </div>
     </section>
 
+    <!-- Modal de Confirmação de Cadastro -->
+    <div class="modal fade" id="successModal" tabindex="-1" aria-labelledby="successModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header bg-success text-white">
+                    <h5 class="modal-title" id="successModalLabel">Cadastro Realizado com Sucesso!</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Fechar"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="text-center mb-4">
+                        <i class="bi bi-check-circle-fill text-success" style="font-size: 3rem;"></i>
+                    </div>
+                    <p class="text-center">Seu cadastro foi realizado com sucesso!</p>
+                    <p class="text-center">Seu perfil será analisado pela nossa equipe. Você receberá um email quando for aprovado.</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-primary" id="goToLogin">Ir para Login</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <footer>
         <div class="container">
             <div class="row">
@@ -135,6 +157,7 @@
     </footer>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css"></script>
     <script src="js/api.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', function() {
@@ -259,6 +282,11 @@
             // Carregar atividades ao iniciar
             loadActivities();
 
+            // Configurar modal de sucesso
+            document.getElementById('goToLogin').addEventListener('click', function() {
+                window.location.href = 'login.html';
+            });
+
             // Processar o formulário de cadastro
             document.getElementById('professional-form').addEventListener('submit', async function(e) {
                 e.preventDefault();
@@ -320,18 +348,16 @@
                     // Enviar para API
                     const result = await window.api.registerProfessional(formData);
                     
-                    alertContainer.innerHTML = '<div class="alert alert-success">Cadastro realizado com sucesso! Seu perfil será analisado pela nossa equipe. Você receberá um email quando for aprovado.</div>';
+                    // Mostrar modal de sucesso
+                    const successModal = new bootstrap.Modal(document.getElementById('successModal'));
+                    successModal.show();
                     
                     // Limpar formulário
                     document.getElementById('professional-form').reset();
                     selectedActivities.clear();
                     document.getElementById('activity-details').innerHTML = '';
                     document.getElementById('selected-activities').innerHTML = '';
-                    
-                    // Redirecionar para login após 3 segundos
-                    setTimeout(() => {
-                        window.location.href = 'login.html';
-                    }, 3000);
+                    alertContainer.innerHTML = '';
                     
                 } catch (error) {
                     console.error('Erro no cadastro:', error);
