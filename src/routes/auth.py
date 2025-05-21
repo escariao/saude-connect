@@ -1,14 +1,54 @@
 from flask import Blueprint, request, jsonify, current_app
 import os
-from werkzeug.security import generate_password_hash
+import jwt
+from werkzeug.security import generate_password_hash, check_password_hash
 from werkzeug.utils import secure_filename
 import uuid
-from datetime import datetime
+from datetime import datetime, timedelta
 
 from src.models.user import db, User
 from src.models.professional import Professional, Activity, ProfessionalActivity
 
 auth_bp = Blueprint('auth', __name__)
+
+@auth_bp.route('/login', methods=['POST'])
+def login():
+    try:
+        data = request.get_json()
+        
+        if not data or not data.get('email') or not data.get('password'):
+            return jsonify({'message': 'Dados de login incompletos'}), 400
+            
+        user = User.query.filter_by(email=data.get('email')).first()
+        
+        if not user or not check_password_hash(user.password, data.get('password')):
+            return jsonify({'message': 'Email ou senha incorretos'}), 401
+            
+        # Gerar token JWT
+        token_payload = {
+            'user_id': user.id,
+            'user_type': user.user_type,
+            'exp': datetime.utcnow() + timedelta(days=1)
+        }
+        
+        token = jwt.encode(
+            token_payload,
+            current_app.config['SECRET_KEY'],
+            algorithm='HS256'
+        )
+        
+        return jsonify({
+            'token': token,
+            'user': {
+                'id': user.id,
+                'name': user.name,
+                'email': user.email,
+                'user_type': user.user_type
+            }
+        }), 200
+        
+    except Exception as e:
+        return jsonify({'message': f'Erro no login: {str(e)}'}), 500
 
 # Configuração para upload de arquivos
 UPLOAD_FOLDER = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'static', 'uploads')
