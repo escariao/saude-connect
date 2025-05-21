@@ -22,13 +22,16 @@ body {
     color: white !important;
 }
 
-.nav-link {
-    color: rgba(255,255,255,0.85) !important;
+.nav-tabs .nav-link {
+    color: var(--dark-color);
     font-weight: 500;
 }
 
-.nav-link:hover {
-    color: white !important;
+.nav-tabs .nav-link.active {
+    color: var(--primary-color);
+    font-weight: 600;
+    border-color: var(--primary-color) var(--light-color) #fff;
+    border-top-width: 2px;
 }
 
 .hero {
