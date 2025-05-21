@@ -28,7 +28,8 @@ class Activity(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(100), nullable=False, unique=True)
     description = db.Column(db.Text, nullable=True)
-    category = db.Column(db.String(50), nullable=True)  # Categoria da atividade (ex: enfermagem, psicologia)
+    # Substituindo o campo de texto por uma chave estrangeira
+    category_id = db.Column(db.Integer, db.ForeignKey('categories.id'), nullable=True)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     
     # Relacionamento com profissionais
