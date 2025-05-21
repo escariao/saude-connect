@@ -1,97 +1,130 @@
-# Saúde Connect
+# 🩺 SAÚDE CONNECT
 
-Sistema de conexão entre profissionais de saúde freelancers e pacientes.
+[![GitHub repo size](https://img.shields.io/github/repo-size/escariao/saude-connect)](https://github.com/escariao/saude-connect)
+[![GitHub issues](https://img.shields.io/github/issues/escariao/saude-connect)](https://github.com/escariao/saude-connect/issues)
+[![GitHub last commit](https://img.shields.io/github/last-commit/escariao/saude-connect)](https://github.com/escariao/saude-connect/commits/master)
 
-## Requisitos
+O **Saúde Connect** é uma plataforma que conecta profissionais de saúde freelancers com pacientes que buscam atendimento especializado. O sistema permite que profissionais cadastrem múltiplas especialidades e serviços, enquanto pacientes podem encontrar o profissional ideal para suas necessidades de saúde.
 
-- Python 3.8+
-- MySQL
+## 🚀 **Principais Funcionalidades**
 
-## Instalação
+✅ **Cadastro de Profissionais** - Com envio de diploma para verificação e aprovação administrativa.
 
-1. Clone o repositório:
-```
-git clone <url-do-repositorio>
-```
+✅ **Cadastro de Pacientes** - Interface simples para pacientes se registrarem na plataforma.
 
-2. Crie um ambiente virtual:
-```
+✅ **Painel Administrativo** - Para aprovação de profissionais e gerenciamento de especialidades.
+
+✅ **Múltiplas Especialidades** - Profissionais podem cadastrar diversas especialidades e serviços.
+
+✅ **Sistema de Busca** - Pacientes podem encontrar profissionais por especialidade ou categoria.
+
+✅ **Perfis Detalhados** - Informações completas sobre cada profissional e seus serviços.
+
+## 🔧 **Tecnologias Utilizadas**
+
+| Tecnologia | Descrição |
+|------------|-----------|
+| **🐍 Python/Flask** | Framework web para backend |
+| **🗄️ PostgreSQL/MySQL** | Banco de dados relacional |
+| **🌐 HTML/CSS/JS** | Frontend responsivo |
+| **🔒 JWT** | Autenticação e autorização |
+| **📱 Bootstrap** | Framework CSS para design responsivo |
+
+## 💻 **Como Usar**
+
+### Instalação Local
+
+```bash
+# Clone o repositório
+git clone https://github.com/escariao/saude-connect.git
+
+# Entre no diretório
+cd saude-connect
+
+# Crie um ambiente virtual
 python -m venv venv
-```
 
-3. Ative o ambiente virtual:
-- Windows:
-```
+# Ative o ambiente virtual
+# No Windows:
 venv\Scripts\activate
-```
-- Linux/Mac:
-```
+# No Linux/Mac:
 source venv/bin/activate
-```
 
-4. Instale as dependências:
-```
+# Instale as dependências
 pip install -r requirements.txt
-```
 
-5. Configure o banco de dados MySQL:
-- Crie um banco de dados chamado `mydb`
-- As credenciais padrão são:
-  - Usuário: root
-  - Senha: password
-  - Host: localhost
-  - Porta: 3306
-
-## Executando a aplicação
-
-```
+# Execute a aplicação
 python -m src.main
 ```
 
-A aplicação estará disponível em `http://localhost:5000`
+### Implantação no Render
 
-## Credenciais de Administrador
+1. Crie uma conta no [Render](https://render.com)
+2. Conecte seu repositório GitHub
+3. Crie um novo Web Service apontando para o repositório
+4. Configure as variáveis de ambiente:
+   - `SECRET_KEY`: Chave secreta para a aplicação
+   - `DATABASE_URL`: URL de conexão com o PostgreSQL
+   - `FLASK_ENV`: `production`
+5. Configure o Build Command: `pip install -r requirements.txt`
+6. Configure o Start Command: `gunicorn src.main:app`
 
-- Email: admin@saudeconnect.com
-- Senha: admin123
+## 📋 **Estrutura do Projeto**
 
-## Estrutura do Projeto
+```
+saude-connect/
+├── src/
+│   ├── models/         # Modelos de dados
+│   ├── routes/         # Rotas da API
+│   ├── static/         # Arquivos estáticos (CSS, JS, imagens)
+│   │   ├── css/        # Estilos CSS
+│   │   ├── js/         # Scripts JavaScript
+│   │   └── uploads/    # Uploads de arquivos (diplomas)
+│   └── main.py         # Ponto de entrada da aplicação
+├── venv/               # Ambiente virtual Python
+├── requirements.txt    # Dependências do projeto
+└── README.md           # Este arquivo
+```
 
-- `src/models/`: Modelos de dados
-- `src/routes/`: Rotas da API
-- `src/static/`: Arquivos estáticos (frontend)
-- `src/main.py`: Ponto de entrada da aplicação
+## 🔐 **Credenciais de Teste**
 
-## Funcionalidades
+### Administrador
+- **Email**: admin@saudeconnect.com
+- **Senha**: admin123
 
-- Cadastro de profissionais com envio de diploma
-- Cadastro de pacientes
-- Painel administrativo para aprovação de profissionais
-- Busca de profissionais por especialidade/atividade
-- Múltiplas atividades por profissional
+## 📱 **Páginas Principais**
 
-## Implantação em Servidores Gratuitos
+- **/** - Página inicial
+- **/login.html** - Login de usuários
+- **/cadastro-paciente.html** - Cadastro de pacientes
+- **/cadastro-profissional.html** - Cadastro de profissionais
+- **/busca.html** - Busca de profissionais
+- **/admin.html** - Painel administrativo
+- **/perfil-paciente.html** - Perfil do paciente
+- **/perfil-profissional.html** - Perfil do profissional
 
-### Opção 1: PythonAnywhere
+## 🔄 **API Endpoints**
 
-1. Crie uma conta em [PythonAnywhere](https://www.pythonanywhere.com/)
-2. Faça upload do arquivo zip e extraia
-3. Crie um aplicativo web Flask
-4. Configure o WSGI para apontar para `src.main:app`
-5. Configure o banco de dados MySQL
+### Autenticação
+- `POST /api/auth/login` - Login de usuários
+- `POST /api/auth/register/patient` - Cadastro de pacientes
+- `POST /api/auth/register/professional` - Cadastro de profissionais
 
-### Opção 2: Heroku
+### Profissionais
+- `GET /api/search/professionals` - Busca de profissionais
+- `GET /api/search/activities/categories` - Lista de categorias de atividades
 
-1. Crie uma conta no [Heroku](https://www.heroku.com/)
-2. Instale o Heroku CLI
-3. Crie um arquivo `Procfile` com o conteúdo: `web: gunicorn src.main:app`
-4. Adicione `gunicorn` ao requirements.txt
-5. Configure o banco de dados (Heroku PostgreSQL ou ClearDB MySQL)
+### Administração
+- `GET /api/admin/professionals/pending` - Lista de profissionais pendentes
+- `POST /api/admin/professionals/{id}/approve` - Aprovar profissional
+- `POST /api/admin/professionals/{id}/reject` - Rejeitar profissional
 
-### Opção 3: Render
+## 📝 **Requisitos do Sistema**
 
-1. Crie uma conta no [Render](https://render.com/)
-2. Crie um novo Web Service
-3. Configure o comando de build: `pip install -r requirements.txt`
-4. Configure o comando de start: `gunicorn src.main:app`
-5. Configure o banco de dados (Render PostgreSQL)
+- Python 3.8+
+- PostgreSQL ou MySQL
+- Navegador web moderno
+
+---
+
+### Desenvolvido por Andrey Montenegro
