@@ -43,7 +43,8 @@
             </div>
             
             <div id="admin-content" class="d-none">
-                <ul class="nav nav-tabs mb-4" id="adminTabs" role="tablist">
+                <!-- Navegação por abas -->
+                <ul class="nav nav-tabs nav-fill mb-4" id="adminTabs" role="tablist">
                     <li class="nav-item" role="presentation">
                         <button class="nav-link active" id="pending-tab" data-bs-toggle="tab" data-bs-target="#pending" type="button" role="tab" aria-controls="pending" aria-selected="true">
                             Profissionais Pendentes
@@ -54,9 +55,16 @@
                             Gerenciar Atividades
                         </button>
                     </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="categories-tab" data-bs-toggle="tab" data-bs-target="#categories" type="button" role="tab" aria-controls="categories" aria-selected="false">
+                            Gerenciar Categorias
+                        </button>
+                    </li>
                 </ul>
                 
+                <!-- Conteúdo das abas -->
                 <div class="tab-content" id="adminTabContent">
+                    <!-- Aba de Profissionais Pendentes -->
                     <div class="tab-pane fade show active" id="pending" role="tabpanel" aria-labelledby="pending-tab">
                         <div class="admin-container">
                             <h4 class="mb-4">Profissionais Aguardando Aprovação</h4>
@@ -68,6 +76,7 @@
                         </div>
                     </div>
                     
+                    <!-- Aba de Gerenciamento de Atividades -->
                     <div class="tab-pane fade" id="activities" role="tabpanel" aria-labelledby="activities-tab">
                         <div class="admin-container">
                             <h4 class="mb-4">Gerenciar Atividades/Especialidades</h4>
@@ -88,9 +97,12 @@
                                                 </div>
                                                 <div class="mb-3">
                                                     <label for="activity-category" class="form-label">Categoria</label>
-                                                    <input type="text" class="form-control" id="activity-category">
-                                                    <div class="form-text">Ex: Enfermagem, Fisioterapia, Psicologia</div>
+                                                    <select class="form-select" id="activity-category" required>
+                                                        <option value="">Selecione uma categoria</option>
+                                                        <!-- Opções serão carregadas via JavaScript -->
+                                                    </select>
                                                 </div>
+                                                <div id="activity-alert" class="mb-3"></div>
                                                 <button type="submit" class="btn btn-primary">Adicionar Atividade</button>
                                             </form>
                                         </div>
@@ -102,6 +114,42 @@
                             <div id="activities-list-container">
                                 <div class="text-center py-3">
                                     <p>Carregando atividades...</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Aba de Gerenciamento de Categorias -->
+                    <div class="tab-pane fade" id="categories" role="tabpanel" aria-labelledby="categories-tab">
+                        <div class="admin-container">
+                            <h4 class="mb-4">Gerenciar Categorias</h4>
+                            
+                            <div class="row mb-4">
+                                <div class="col-md-8">
+                                    <div class="card">
+                                        <div class="card-body">
+                                            <h5 class="card-title">Adicionar Nova Categoria</h5>
+                                            <form id="category-form">
+                                                <div class="mb-3">
+                                                    <label for="category-name" class="form-label">Nome da Categoria</label>
+                                                    <input type="text" class="form-control" id="category-name" required>
+                                                </div>
+                                                <div class="mb-3">
+                                                    <label for="category-description" class="form-label">Descrição</label>
+                                                    <textarea class="form-control" id="category-description" rows="2"></textarea>
+                                                </div>
+                                                <div id="category-alert" class="mb-3"></div>
+                                                <button type="submit" class="btn btn-primary">Adicionar Categoria</button>
+                                            </form>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <h5 class="mb-3">Categorias Existentes</h5>
+                            <div id="categories-list-container">
+                                <div class="text-center py-3">
+                                    <p>Carregando categorias...</p>
                                 </div>
                             </div>
                         </div>
@@ -183,6 +231,73 @@
         </div>
     </div>
 
+    <!-- Modal para editar categoria -->
+    <div class="modal fade" id="editCategoryModal" tabindex="-1" aria-labelledby="editCategoryModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="editCategoryModalLabel">Editar Categoria</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="edit-category-form">
+                        <input type="hidden" id="edit-category-id">
+                        <div class="mb-3">
+                            <label for="edit-category-name" class="form-label">Nome da Categoria</label>
+                            <input type="text" class="form-control" id="edit-category-name" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="edit-category-description" class="form-label">Descrição</label>
+                            <textarea class="form-control" id="edit-category-description" rows="3"></textarea>
+                        </div>
+                        <div id="edit-category-alert" class="mb-3"></div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="button" class="btn btn-primary" id="confirm-edit-category">Salvar Alterações</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal para editar atividade -->
+    <div class="modal fade" id="editActivityModal" tabindex="-1" aria-labelledby="editActivityModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="editActivityModalLabel">Editar Atividade</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="edit-activity-form">
+                        <input type="hidden" id="edit-activity-id">
+                        <div class="mb-3">
+                            <label for="edit-activity-name" class="form-label">Nome da Atividade</label>
+                            <input type="text" class="form-control" id="edit-activity-name" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="edit-activity-description" class="form-label">Descrição</label>
+                            <textarea class="form-control" id="edit-activity-description" rows="2"></textarea>
+                        </div>
+                        <div class="mb-3">
+                            <label for="edit-activity-category" class="form-label">Categoria</label>
+                            <select class="form-select" id="edit-activity-category" required>
+                                <option value="">Selecione uma categoria</option>
+                                <!-- Opções serão carregadas via JavaScript -->
+                            </select>
+                        </div>
+                        <div id="edit-activity-alert" class="mb-3"></div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="button" class="btn btn-primary" id="confirm-edit-activity">Salvar Alterações</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script src="js/api.js"></script>
     <script>
@@ -213,6 +328,9 @@
             // Carregar atividades
             loadActivities();
             
+            // Carregar categorias
+            loadCategories();
+            
             // Configurar logout
             document.getElementById('logout-link').addEventListener('click', function(e) {
                 e.preventDefault();
@@ -226,9 +344,25 @@
                 addActivity();
             });
             
+            // Configurar formulário de categoria
+            document.getElementById('category-form').addEventListener('submit', function(e) {
+                e.preventDefault();
+                addCategory();
+            });
+            
             // Configurar modal de rejeição
             document.getElementById('confirm-reject').addEventListener('click', function() {
                 rejectProfessional();
+            });
+            
+            // Configurar modal de edição de categoria
+            document.getElementById('confirm-edit-category').addEventListener('click', function() {
+                updateCategory();
+            });
+            
+            // Configurar modal de edição de atividade
+            document.getElementById('confirm-edit-activity').addEventListener('click', function() {
+                updateActivity();
             });
         });
         
@@ -298,9 +432,26 @@
         
         async function loadActivities() {
             const container = document.getElementById('activities-list-container');
+            const categorySelect = document.getElementById('activity-category');
+            const editCategorySelect = document.getElementById('edit-activity-category');
             
             try {
-                const activities = await window.api.getActivities();
+                const [activities, categories] = await Promise.all([
+                    window.api.getActivities(),
+                    window.api.getCategories()
+                ]);
+                
+                // Preencher selects de categorias
+                categorySelect.innerHTML = '<option value="">Selecione uma categoria</option>';
+                editCategorySelect.innerHTML = '<option value="">Selecione uma categoria</option>';
+                
+                categories.forEach(category => {
+                    const option = document.createElement('option');
+                    option.value = category.id;
+                    option.textContent = category.name;
+                    categorySelect.appendChild(option.cloneNode(true));
+                    editCategorySelect.appendChild(option);
+                });
                 
                 if (activities.length === 0) {
                     container.innerHTML = '<div class="alert alert-info">Não há atividades cadastradas no momento.</div>';
@@ -315,6 +466,7 @@
                             <th>Nome</th>
                             <th>Descrição</th>
                             <th>Categoria</th>
+                            <th>Ações</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -325,8 +477,16 @@
                         <tr>
                             <td>${activity.id}</td>
                             <td>${activity.name}</td>
-                            <td>${activity.description || '-'}</td>
-                            <td>${activity.category || '-'}</td>
+                            <td>${activity.description || 'Sem descrição'}</td>
+                            <td>${activity.category_name || 'Sem categoria'}</td>
+                            <td>
+                                <button class="btn btn-sm btn-primary me-1" onclick="openEditActivityModal(${activity.id}, '${activity.name}', '${activity.description || ''}', ${activity.category_id || 'null'})">
+                                    Editar
+                                </button>
+                                <button class="btn btn-sm btn-danger" onclick="deleteActivity(${activity.id})">
+                                    Excluir
+                                </button>
+                            </td>
                         </tr>
                     `;
                 });
@@ -343,27 +503,269 @@
             }
         }
         
-        function viewDiploma(profId) {
-            const diplomaFrame = document.getElementById('diploma-frame');
-            diplomaFrame.src = `/api/admin/professionals/${profId}/diploma`;
+        async function loadCategories() {
+            const container = document.getElementById('categories-list-container');
             
-            const diplomaModal = new bootstrap.Modal(document.getElementById('diplomaModal'));
-            diplomaModal.show();
+            try {
+                const categories = await window.api.getCategories();
+                
+                if (categories.length === 0) {
+                    container.innerHTML = '<div class="alert alert-info">Não há categorias cadastradas no momento.</div>';
+                    return;
+                }
+                
+                let html = '<div class="table-responsive"><table class="table table-striped">';
+                html += `
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Nome</th>
+                            <th>Descrição</th>
+                            <th>Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                `;
+                
+                categories.forEach(category => {
+                    html += `
+                        <tr>
+                            <td>${category.id}</td>
+                            <td>${category.name}</td>
+                            <td>${category.description || 'Sem descrição'}</td>
+                            <td>
+                                <button class="btn btn-sm btn-primary me-1" onclick="openEditCategoryModal(${category.id}, '${category.name}', '${category.description || ''}')">
+                                    Editar
+                                </button>
+                                <button class="btn btn-sm btn-danger" onclick="deleteCategory(${category.id})">
+                                    Excluir
+                                </button>
+                            </td>
+                        </tr>
+                    `;
+                });
+                
+                html += '</tbody></table></div>';
+                container.innerHTML = html;
+                
+            } catch (error) {
+                container.innerHTML = `
+                    <div class="alert alert-danger">
+                        Erro ao carregar categorias: ${error.message || 'Tente novamente mais tarde.'}
+                    </div>
+                `;
+            }
+        }
+        
+        async function addActivity() {
+            const name = document.getElementById('activity-name').value;
+            const description = document.getElementById('activity-description').value;
+            const categoryId = document.getElementById('activity-category').value;
+            
+            const alertContainer = document.getElementById('activity-alert');
+            
+            try {
+                alertContainer.innerHTML = '<div class="alert alert-info">Adicionando atividade...</div>';
+                
+                await window.api.addActivity({
+                    name,
+                    description,
+                    category_id: categoryId || null
+                });
+                
+                alertContainer.innerHTML = '<div class="alert alert-success">Atividade adicionada com sucesso!</div>';
+                
+                // Limpar formulário
+                document.getElementById('activity-form').reset();
+                
+                // Recarregar lista de atividades
+                loadActivities();
+                
+            } catch (error) {
+                alertContainer.innerHTML = `<div class="alert alert-danger">Erro ao adicionar atividade: ${error.message || 'Tente novamente mais tarde.'}</div>`;
+            }
+        }
+        
+        async function addCategory() {
+            const name = document.getElementById('category-name').value;
+            const description = document.getElementById('category-description').value;
+            
+            const alertContainer = document.getElementById('category-alert');
+            
+            try {
+                alertContainer.innerHTML = '<div class="alert alert-info">Adicionando categoria...</div>';
+                
+                await window.api.addCategory({
+                    name,
+                    description
+                });
+                
+                alertContainer.innerHTML = '<div class="alert alert-success">Categoria adicionada com sucesso!</div>';
+                
+                // Limpar formulário
+                document.getElementById('category-form').reset();
+                
+                // Recarregar lista de categorias
+                loadCategories();
+                
+                // Recarregar lista de atividades para atualizar os selects
+                loadActivities();
+                
+            } catch (error) {
+                alertContainer.innerHTML = `<div class="alert alert-danger">Erro ao adicionar categoria: ${error.message || 'Tente novamente mais tarde.'}</div>`;
+            }
+        }
+        
+        function openEditCategoryModal(id, name, description) {
+            document.getElementById('edit-category-id').value = id;
+            document.getElementById('edit-category-name').value = name;
+            document.getElementById('edit-category-description').value = description;
+            document.getElementById('edit-category-alert').innerHTML = '';
+            
+            const modal = new bootstrap.Modal(document.getElementById('editCategoryModal'));
+            modal.show();
+        }
+        
+        function openEditActivityModal(id, name, description, categoryId) {
+            document.getElementById('edit-activity-id').value = id;
+            document.getElementById('edit-activity-name').value = name;
+            document.getElementById('edit-activity-description').value = description;
+            
+            if (categoryId) {
+                document.getElementById('edit-activity-category').value = categoryId;
+            } else {
+                document.getElementById('edit-activity-category').value = '';
+            }
+            
+            document.getElementById('edit-activity-alert').innerHTML = '';
+            
+            const modal = new bootstrap.Modal(document.getElementById('editActivityModal'));
+            modal.show();
+        }
+        
+        async function updateCategory() {
+            const id = document.getElementById('edit-category-id').value;
+            const name = document.getElementById('edit-category-name').value;
+            const description = document.getElementById('edit-category-description').value;
+            
+            const alertContainer = document.getElementById('edit-category-alert');
+            
+            try {
+                alertContainer.innerHTML = '<div class="alert alert-info">Atualizando categoria...</div>';
+                
+                await window.api.updateCategory(id, {
+                    name,
+                    description
+                });
+                
+                alertContainer.innerHTML = '<div class="alert alert-success">Categoria atualizada com sucesso!</div>';
+                
+                // Recarregar lista de categorias
+                loadCategories();
+                
+                // Recarregar lista de atividades para atualizar os selects
+                loadActivities();
+                
+                // Fechar modal após 1 segundo
+                setTimeout(() => {
+                    const modal = bootstrap.Modal.getInstance(document.getElementById('editCategoryModal'));
+                    modal.hide();
+                }, 1000);
+                
+            } catch (error) {
+                alertContainer.innerHTML = `<div class="alert alert-danger">Erro ao atualizar categoria: ${error.message || 'Tente novamente mais tarde.'}</div>`;
+            }
+        }
+        
+        async function updateActivity() {
+            const id = document.getElementById('edit-activity-id').value;
+            const name = document.getElementById('edit-activity-name').value;
+            const description = document.getElementById('edit-activity-description').value;
+            const categoryId = document.getElementById('edit-activity-category').value;
+            
+            const alertContainer = document.getElementById('edit-activity-alert');
+            
+            try {
+                alertContainer.innerHTML = '<div class="alert alert-info">Atualizando atividade...</div>';
+                
+                await window.api.updateActivity(id, {
+                    name,
+                    description,
+                    category_id: categoryId || null
+                });
+                
+                alertContainer.innerHTML = '<div class="alert alert-success">Atividade atualizada com sucesso!</div>';
+                
+                // Recarregar lista de atividades
+                loadActivities();
+                
+                // Fechar modal após 1 segundo
+                setTimeout(() => {
+                    const modal = bootstrap.Modal.getInstance(document.getElementById('editActivityModal'));
+                    modal.hide();
+                }, 1000);
+                
+            } catch (error) {
+                alertContainer.innerHTML = `<div class="alert alert-danger">Erro ao atualizar atividade: ${error.message || 'Tente novamente mais tarde.'}</div>`;
+            }
+        }
+        
+        async function deleteCategory(id) {
+            if (!confirm('Tem certeza que deseja excluir esta categoria? Esta ação não pode ser desfeita.')) {
+                return;
+            }
+            
+            try {
+                await window.api.deleteCategory(id);
+                
+                // Recarregar lista de categorias
+                loadCategories();
+                
+                // Recarregar lista de atividades para atualizar os selects
+                loadActivities();
+                
+            } catch (error) {
+                alert(`Erro ao excluir categoria: ${error.message || 'Tente novamente mais tarde.'}`);
+            }
+        }
+        
+        async function deleteActivity(id) {
+            if (!confirm('Tem certeza que deseja excluir esta atividade? Esta ação não pode ser desfeita.')) {
+                return;
+            }
+            
+            try {
+                await window.api.deleteActivity(id);
+                
+                // Recarregar lista de atividades
+                loadActivities();
+                
+            } catch (error) {
+                alert(`Erro ao excluir atividade: ${error.message || 'Tente novamente mais tarde.'}`);
+            }
+        }
+        
+        function viewDiploma(profId) {
+            // Simulação - em produção, usaria URL real do diploma
+            document.getElementById('diploma-frame').src = `https://example.com/diploma/${profId}`;
+            
+            const modal = new bootstrap.Modal(document.getElementById('diplomaModal'));
+            modal.show();
         }
         
         function openRejectModal(profId) {
             document.getElementById('reject-prof-id').value = profId;
             document.getElementById('reject-reason').value = '';
             
-            const rejectModal = new bootstrap.Modal(document.getElementById('rejectModal'));
-            rejectModal.show();
+            const modal = new bootstrap.Modal(document.getElementById('rejectModal'));
+            modal.show();
         }
         
         async function rejectProfessional() {
             const profId = document.getElementById('reject-prof-id').value;
             const reason = document.getElementById('reject-reason').value;
             
-            if (!reason) {
+            if (!reason.trim()) {
                 alert('Por favor, informe o motivo da rejeição.');
                 return;
             }
@@ -372,13 +774,11 @@
                 await window.api.rejectProfessional(profId, reason);
                 
                 // Fechar modal
-                const rejectModal = bootstrap.Modal.getInstance(document.getElementById('rejectModal'));
-                rejectModal.hide();
+                const modal = bootstrap.Modal.getInstance(document.getElementById('rejectModal'));
+                modal.hide();
                 
-                // Recarregar lista
+                // Recarregar lista de profissionais pendentes
                 loadPendingProfessionals();
-                
-                alert('Profissional rejeitado com sucesso!');
                 
             } catch (error) {
                 alert(`Erro ao rejeitar profissional: ${error.message || 'Tente novamente mais tarde.'}`);
@@ -386,64 +786,14 @@
         }
         
         async function approveProfessional(profId) {
-            if (!confirm('Tem certeza que deseja aprovar este profissional?')) {
-                return;
-            }
-            
             try {
                 await window.api.approveProfessional(profId);
                 
-                // Recarregar lista
+                // Recarregar lista de profissionais pendentes
                 loadPendingProfessionals();
-                
-                alert('Profissional aprovado com sucesso!');
                 
             } catch (error) {
                 alert(`Erro ao aprovar profissional: ${error.message || 'Tente novamente mais tarde.'}`);
-            }
-        }
-        
-        async function addActivity() {
-            const name = document.getElementById('activity-name').value;
-            const description = document.getElementById('activity-description').value;
-            const category = document.getElementById('activity-category').value;
-            
-            if (!name) {
-                alert('Por favor, informe o nome da atividade.');
-                return;
-            }
-            
-            try {
-                const response = await fetch(`/api/admin/activities`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${window.api.getAuthToken()}`
-                    },
-                    body: JSON.stringify({
-                        name,
-                        description,
-                        category
-                    })
-                });
-                
-                if (!response.ok) {
-                    const data = await response.json();
-                    throw new Error(data.error || 'Erro ao adicionar atividade');
-                }
-                
-                // Limpar formulário
-                document.getElementById('activity-name').value = '';
-                document.getElementById('activity-description').value = '';
-                document.getElementById('activity-category').value = '';
-                
-                // Recarregar lista
-                loadActivities();
-                
-                alert('Atividade adicionada com sucesso!');
-                
-            } catch (error) {
-                alert(`Erro ao adicionar atividade: ${error.message || 'Tente novamente mais tarde.'}`);
             }
         }
     </script>

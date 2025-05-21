@@ -4,7 +4,7 @@ const API_BASE_URL = '';  // URL base vazia para usar o mesmo domínio
 // Funções de autenticação
 async function login(email, password) {
     try {
-        const response = await fetch(`${API_BASE_URL}/api/user/login`, {
+        const response = await fetch(`${API_BASE_URL}/api/auth/login`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -126,7 +126,7 @@ async function searchProfessionals(activityId = null, category = null) {
 
 async function getActivities() {
     try {
-        const response = await fetch(`${API_BASE_URL}/api/auth/activities`);
+        const response = await fetch(`${API_BASE_URL}/api/search/activities`);
         
         if (!response.ok) {
             const data = await response.json();
@@ -140,9 +140,9 @@ async function getActivities() {
     }
 }
 
-async function getActivityCategories() {
+async function getCategories() {
     try {
-        const response = await fetch(`${API_BASE_URL}/api/search/activities/categories`);
+        const response = await fetch(`${API_BASE_URL}/api/admin/categories`);
         
         if (!response.ok) {
             const data = await response.json();
@@ -221,6 +221,142 @@ async function rejectProfessional(profId, reason) {
     }
 }
 
+// Funções para gerenciamento de categorias
+async function addCategory(categoryData) {
+    try {
+        const response = await fetch(`${API_BASE_URL}/api/admin/categories`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${getAuthToken()}`
+            },
+            body: JSON.stringify(categoryData)
+        });
+        
+        if (!response.ok) {
+            const data = await response.json();
+            throw new Error(data.error || 'Erro ao adicionar categoria');
+        }
+        
+        return await response.json();
+    } catch (error) {
+        console.error('Erro ao adicionar categoria:', error);
+        throw error;
+    }
+}
+
+async function updateCategory(id, categoryData) {
+    try {
+        const response = await fetch(`${API_BASE_URL}/api/admin/categories/${id}`, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${getAuthToken()}`
+            },
+            body: JSON.stringify(categoryData)
+        });
+        
+        if (!response.ok) {
+            const data = await response.json();
+            throw new Error(data.error || 'Erro ao atualizar categoria');
+        }
+        
+        return await response.json();
+    } catch (error) {
+        console.error('Erro ao atualizar categoria:', error);
+        throw error;
+    }
+}
+
+async function deleteCategory(id) {
+    try {
+        const response = await fetch(`${API_BASE_URL}/api/admin/categories/${id}`, {
+            method: 'DELETE',
+            headers: {
+                'Authorization': `Bearer ${getAuthToken()}`
+            }
+        });
+        
+        if (!response.ok) {
+            const data = await response.json();
+            throw new Error(data.error || 'Erro ao excluir categoria');
+        }
+        
+        return await response.json();
+    } catch (error) {
+        console.error('Erro ao excluir categoria:', error);
+        throw error;
+    }
+}
+
+// Funções para gerenciamento de atividades
+async function addActivity(activityData) {
+    try {
+        const response = await fetch(`${API_BASE_URL}/api/admin/activities`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${getAuthToken()}`
+            },
+            body: JSON.stringify(activityData)
+        });
+        
+        if (!response.ok) {
+            const data = await response.json();
+            throw new Error(data.error || 'Erro ao adicionar atividade');
+        }
+        
+        return await response.json();
+    } catch (error) {
+        console.error('Erro ao adicionar atividade:', error);
+        throw error;
+    }
+}
+
+async function updateActivity(id, activityData) {
+    try {
+        const response = await fetch(`${API_BASE_URL}/api/admin/activities/${id}`, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${getAuthToken()}`
+            },
+            body: JSON.stringify(activityData)
+        });
+        
+        if (!response.ok) {
+            const data = await response.json();
+            throw new Error(data.error || 'Erro ao atualizar atividade');
+        }
+        
+        return await response.json();
+    } catch (error) {
+        console.error('Erro ao atualizar atividade:', error);
+        throw error;
+    }
+}
+
+async function deleteActivity(id) {
+    try {
+        const response = await fetch(`${API_BASE_URL}/api/admin/activities/${id}`, {
+            method: 'DELETE',
+            headers: {
+                'Authorization': `Bearer ${getAuthToken()}`
+            }
+        });
+        
+        if (!response.ok) {
+            const data = await response.json();
+            throw new Error(data.error || 'Erro ao excluir atividade');
+        }
+        
+        return await response.json();
+    } catch (error) {
+        console.error('Erro ao excluir atividade:', error);
+        throw error;
+    }
+}
+
 // Funções para perfil do usuário
 async function getUserProfile() {
     try {
@@ -254,9 +390,15 @@ window.api = {
     registerProfessional,
     searchProfessionals,
     getActivities,
-    getActivityCategories,
+    getCategories,
     getPendingProfessionals,
     approveProfessional,
     rejectProfessional,
-    getUserProfile
+    getUserProfile,
+    addCategory,
+    updateCategory,
+    deleteCategory,
+    addActivity,
+    updateActivity,
+    deleteActivity
 };

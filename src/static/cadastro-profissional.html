@@ -299,30 +299,43 @@
                     formData.append('diploma', diploma);
                     formData.append('bio', bio);
                     
-                    // Adicionar atividades selecionadas
+                    // Adicionar atividades selecionadas com seus detalhes
+                    const activitiesData = [];
                     selectedActivities.forEach(activityId => {
-                        formData.append('activities[]', activityId);
+                        const description = document.getElementById(`description-${activityId}`)?.value || '';
+                        const experience = document.getElementById(`experience-${activityId}`)?.value || '';
+                        const price = document.getElementById(`price-${activityId}`)?.value || '';
                         
-                        const description = document.getElementById(`description-${activityId}`).value;
-                        const experience = document.getElementById(`experience-${activityId}`).value;
-                        const price = document.getElementById(`price-${activityId}`).value;
-                        
-                        formData.append('descriptions[]', description);
-                        formData.append('experience_years[]', experience);
-                        formData.append('prices[]', price);
+                        activitiesData.push({
+                            id: activityId,
+                            description: description,
+                            experience_years: experience,
+                            price: price
+                        });
                     });
                     
-                    const data = await window.api.registerProfessional(formData);
+                    // Adicionar JSON de atividades ao FormData
+                    formData.append('activities_data', JSON.stringify(activitiesData));
                     
-                    alertContainer.innerHTML = '<div class="alert alert-success">Cadastro realizado com sucesso! Seu perfil será analisado pela nossa equipe. Redirecionando para o login...</div>';
+                    // Enviar para API
+                    const result = await window.api.registerProfessional(formData);
                     
-                    // Redirecionar para o login
+                    alertContainer.innerHTML = '<div class="alert alert-success">Cadastro realizado com sucesso! Seu perfil será analisado pela nossa equipe. Você receberá um email quando for aprovado.</div>';
+                    
+                    // Limpar formulário
+                    document.getElementById('professional-form').reset();
+                    selectedActivities.clear();
+                    document.getElementById('activity-details').innerHTML = '';
+                    document.getElementById('selected-activities').innerHTML = '';
+                    
+                    // Redirecionar para login após 3 segundos
                     setTimeout(() => {
                         window.location.href = 'login.html';
                     }, 3000);
                     
                 } catch (error) {
-                    alertContainer.innerHTML = `<div class="alert alert-danger">${error.message || 'Erro ao cadastrar. Verifique os dados e tente novamente.'}</div>`;
+                    console.error('Erro no cadastro:', error);
+                    alertContainer.innerHTML = `<div class="alert alert-danger">Erro ao realizar cadastro: ${error.message || 'Tente novamente mais tarde.'}</div>`;
                 }
             });
         });
