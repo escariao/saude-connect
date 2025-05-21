@@ -12,7 +12,7 @@ from src.routes.admin import admin_bp
 from src.routes.search import search_bp
 
 app = Flask(__name__, static_folder=os.path.join(os.path.dirname(__file__), 'static'))
-app.config['SECRET_KEY'] = 'asdf#FGSgvasgf$5$WGT'
+app.config['SECRET_KEY'] = os.getenv('SECRET_KEY', 'asdf#FGSgvasgf$5$WGT')
 
 # Registrar blueprints
 app.register_blueprint(user_bp, url_prefix='/api/user')
@@ -22,7 +22,18 @@ app.register_blueprint(admin_bp, url_prefix='/api/admin')
 app.register_blueprint(search_bp, url_prefix='/api/search')
 
 # Configuração do banco de dados
-app.config['SQLALCHEMY_DATABASE_URI'] = f"mysql+pymysql://{os.getenv('DB_USERNAME', 'root')}:{os.getenv('DB_PASSWORD', 'password')}@{os.getenv('DB_HOST', 'localhost')}:{os.getenv('DB_PORT', '3306')}/{os.getenv('DB_NAME', 'mydb')}"
+database_url = os.getenv('DATABASE_URL')
+
+if database_url:
+    # Configuração para Render (PostgreSQL)
+    # Render fornece URLs no formato: postgres://user:password@host:port/dbname
+    # SQLAlchemy espera: postgresql://user:password@host:port/dbname
+    database_url = database_url.replace('postgres://', 'postgresql://', 1)
+    app.config['SQLALCHEMY_DATABASE_URI'] = database_url
+else:
+    # Configuração para desenvolvimento local (MySQL)
+    app.config['SQLALCHEMY_DATABASE_URI'] = f"mysql+pymysql://{os.getenv('DB_USERNAME', 'root')}:{os.getenv('DB_PASSWORD', 'password')}@{os.getenv('DB_HOST', 'localhost')}:{os.getenv('DB_PORT', '3306')}/{os.getenv('DB_NAME', 'mydb')}"
+
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db.init_app(app)
 
@@ -66,4 +77,4 @@ def serve(path):
 
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=5000, debug=True)
+    app.run(host='0.0.0.0', port=int(os.getenv('PORT', 5000)), debug=False)
