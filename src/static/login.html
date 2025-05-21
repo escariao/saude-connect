@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - Saúde Connect</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="css/styles.css" rel="stylesheet">
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark">
+        <div class="container">
+            <a class="navbar-brand" href="index.html">Saúde Connect</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="index.html">Início</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="busca.html">Buscar Profissionais</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="cadastro-paciente.html">Cadastro Paciente</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="cadastro-profissional.html">Cadastro Profissional</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active" href="login.html">Login</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <section class="py-5 bg-light">
+        <div class="container">
+            <div class="login-container">
+                <h2 class="text-center mb-4">Login</h2>
+                <div id="alert-container"></div>
+                <form id="login-form">
+                    <div class="mb-3">
+                        <label for="email" class="form-label">Email</label>
+                        <input type="email" class="form-control" id="email" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="password" class="form-label">Senha</label>
+                        <input type="password" class="form-control" id="password" required>
+                    </div>
+                    <button type="submit" class="btn btn-primary w-100">Entrar</button>
+                    <div class="text-center mt-3">
+                        <a href="#" class="text-decoration-none">Esqueceu sua senha?</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </section>
+
+    <footer>
+        <div class="container">
+            <div class="row">
+                <div class="col-md-4 mb-4 mb-md-0">
+                    <h5>Saúde Connect</h5>
+                    <p>Conectando profissionais de saúde e pacientes de forma simples, segura e eficiente.</p>
+                </div>
+                <div class="col-md-4 mb-4 mb-md-0">
+                    <h5>Links Rápidos</h5>
+                    <ul class="list-unstyled footer-links">
+                        <li><a href="index.html">Início</a></li>
+                        <li><a href="busca.html">Buscar Profissionais</a></li>
+                        <li><a href="cadastro-paciente.html">Cadastro Paciente</a></li>
+                        <li><a href="cadastro-profissional.html">Cadastro Profissional</a></li>
+                    </ul>
+                </div>
+                <div class="col-md-4">
+                    <h5>Contato</h5>
+                    <ul class="list-unstyled footer-links">
+                        <li><a href="mailto:contato@saudeconnect.com">contato@saudeconnect.com</a></li>
+                        <li><a href="tel:+551199999999">(11) 9999-9999</a></li>
+                    </ul>
+                </div>
+            </div>
+            <hr class="mt-4 mb-3">
+            <div class="text-center">
+                <p class="mb-0">&copy; 2025 Saúde Connect. Todos os direitos reservados.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="js/api.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Verificar se o usuário já está autenticado
+            if (window.api.isAuthenticated()) {
+                const userType = window.api.getUserType();
+                if (userType === 'admin') {
+                    window.location.href = 'admin.html';
+                } else if (userType === 'professional') {
+                    window.location.href = 'perfil-profissional.html';
+                } else if (userType === 'patient') {
+                    window.location.href = 'perfil-paciente.html';
+                }
+            }
+
+            // Processar o formulário de login
+            document.getElementById('login-form').addEventListener('submit', async function(e) {
+                e.preventDefault();
+                
+                const email = document.getElementById('email').value;
+                const password = document.getElementById('password').value;
+                const alertContainer = document.getElementById('alert-container');
+                
+                try {
+                    alertContainer.innerHTML = '<div class="alert alert-info">Fazendo login...</div>';
+                    
+                    const data = await window.api.login(email, password);
+                    
+                    alertContainer.innerHTML = '<div class="alert alert-success">Login realizado com sucesso! Redirecionando...</div>';
+                    
+                    // Redirecionar com base no tipo de usuário
+                    setTimeout(() => {
+                        if (data.user.user_type === 'admin') {
+                            window.location.href = 'admin.html';
+                        } else if (data.user.user_type === 'professional') {
+                            window.location.href = 'perfil-profissional.html';
+                        } else if (data.user.user_type === 'patient') {
+                            window.location.href = 'perfil-paciente.html';
+                        } else {
+                            window.location.href = 'index.html';
+                        }
+                    }, 1000);
+                    
+                } catch (error) {
+                    alertContainer.innerHTML = `<div class="alert alert-danger">${error.message || 'Erro ao fazer login. Verifique suas credenciais.'}</div>`;
+                }
+            });
+        });
+    </script>
+</body>
+</html>

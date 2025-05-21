@@ -1,0 +1,415 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Perfil do Profissional - Saúde Connect</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="css/styles.css" rel="stylesheet">
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark">
+        <div class="container">
+            <a class="navbar-brand" href="index.html">Saúde Connect</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="index.html">Início</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="busca.html">Buscar Profissionais</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active" href="perfil-profissional.html">Meu Perfil</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#" id="logout-link">Sair</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <section class="py-5 bg-light">
+        <div class="container">
+            <h2 class="section-title text-center">Meu Perfil Profissional</h2>
+            
+            <div id="auth-alert" class="alert alert-danger d-none">
+                Você precisa estar autenticado como profissional para acessar esta página.
+                <a href="login.html" class="alert-link">Faça login</a> para continuar.
+            </div>
+            
+            <div id="profile-content" class="d-none">
+                <div class="row">
+                    <div class="col-md-4 mb-4">
+                        <div class="profile-container">
+                            <h4 class="mb-4">Informações Pessoais</h4>
+                            <div id="profile-info">
+                                <div class="text-center py-3">
+                                    <p>Carregando informações...</p>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="profile-container">
+                            <h4 class="mb-4">Status de Aprovação</h4>
+                            <div id="approval-status">
+                                <div class="text-center py-3">
+                                    <p>Carregando status...</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="col-md-8">
+                        <div class="profile-container mb-4">
+                            <h4 class="mb-4">Minhas Especialidades</h4>
+                            <div id="activities-container">
+                                <div class="text-center py-3">
+                                    <p>Carregando especialidades...</p>
+                                </div>
+                            </div>
+                            
+                            <div class="mt-4">
+                                <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addActivityModal">
+                                    Adicionar Nova Especialidade
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <div class="profile-container">
+                            <h4 class="mb-4">Editar Perfil</h4>
+                            <form id="edit-profile-form">
+                                <div class="mb-3">
+                                    <label for="edit-name" class="form-label">Nome Completo</label>
+                                    <input type="text" class="form-control" id="edit-name" required>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="edit-phone" class="form-label">Telefone</label>
+                                    <input type="tel" class="form-control" id="edit-phone">
+                                </div>
+                                <div class="mb-3">
+                                    <label for="edit-bio" class="form-label">Biografia Profissional</label>
+                                    <textarea class="form-control" id="edit-bio" rows="3"></textarea>
+                                </div>
+                                <div id="edit-alert" class="mb-3"></div>
+                                <button type="submit" class="btn btn-primary">Salvar Alterações</button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Modal para adicionar atividade -->
+    <div class="modal fade" id="addActivityModal" tabindex="-1" aria-labelledby="addActivityModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="addActivityModalLabel">Adicionar Nova Especialidade</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="add-activity-form">
+                        <div class="mb-3">
+                            <label for="activity-select" class="form-label">Especialidade</label>
+                            <select class="form-select" id="activity-select" required>
+                                <option value="">Selecione uma especialidade</option>
+                                <!-- Opções serão carregadas via JavaScript -->
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label for="activity-description" class="form-label">Descrição do Serviço</label>
+                            <textarea class="form-control" id="activity-description" rows="2"></textarea>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="activity-experience" class="form-label">Anos de Experiência</label>
+                                <input type="number" class="form-control" id="activity-experience" min="0">
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="activity-price" class="form-label">Preço (R$)</label>
+                                <input type="number" class="form-control" id="activity-price" min="0" step="0.01">
+                            </div>
+                        </div>
+                        <div id="activity-alert" class="mb-3"></div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="button" class="btn btn-primary" id="save-activity-btn">Adicionar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <footer>
+        <div class="container">
+            <div class="row">
+                <div class="col-md-4 mb-4 mb-md-0">
+                    <h5>Saúde Connect</h5>
+                    <p>Conectando profissionais de saúde e pacientes de forma simples, segura e eficiente.</p>
+                </div>
+                <div class="col-md-4 mb-4 mb-md-0">
+                    <h5>Links Rápidos</h5>
+                    <ul class="list-unstyled footer-links">
+                        <li><a href="index.html">Início</a></li>
+                        <li><a href="busca.html">Buscar Profissionais</a></li>
+                    </ul>
+                </div>
+                <div class="col-md-4">
+                    <h5>Contato</h5>
+                    <ul class="list-unstyled footer-links">
+                        <li><a href="mailto:contato@saudeconnect.com">contato@saudeconnect.com</a></li>
+                        <li><a href="tel:+551199999999">(11) 9999-9999</a></li>
+                    </ul>
+                </div>
+            </div>
+            <hr class="mt-4 mb-3">
+            <div class="text-center">
+                <p class="mb-0">&copy; 2025 Saúde Connect. Todos os direitos reservados.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="js/api.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Verificar autenticação
+            if (!window.api.isAuthenticated()) {
+                document.getElementById('auth-alert').classList.remove('d-none');
+                document.getElementById('profile-content').classList.add('d-none');
+                return;
+            }
+            
+            // Verificar se é profissional
+            const userType = window.api.getUserType();
+            if (userType !== 'professional') {
+                document.getElementById('auth-alert').classList.remove('d-none');
+                document.getElementById('auth-alert').innerHTML = 'Você não tem permissão para acessar esta página. <a href="index.html" class="alert-link">Voltar para a página inicial</a>.';
+                document.getElementById('profile-content').classList.add('d-none');
+                return;
+            }
+            
+            // Mostrar conteúdo do perfil
+            document.getElementById('auth-alert').classList.add('d-none');
+            document.getElementById('profile-content').classList.remove('d-none');
+            
+            // Carregar perfil
+            loadProfile();
+            
+            // Carregar atividades disponíveis para o modal
+            loadAvailableActivities();
+            
+            // Configurar logout
+            document.getElementById('logout-link').addEventListener('click', function(e) {
+                e.preventDefault();
+                window.api.logout();
+                window.location.href = 'index.html';
+            });
+            
+            // Configurar formulário de edição
+            document.getElementById('edit-profile-form').addEventListener('submit', function(e) {
+                e.preventDefault();
+                updateProfile();
+            });
+            
+            // Configurar botão de adicionar atividade
+            document.getElementById('save-activity-btn').addEventListener('click', function() {
+                addActivity();
+            });
+        });
+        
+        async function loadProfile() {
+            const profileInfo = document.getElementById('profile-info');
+            const approvalStatus = document.getElementById('approval-status');
+            const activitiesContainer = document.getElementById('activities-container');
+            
+            try {
+                const profile = await window.api.getUserProfile();
+                
+                // Preencher informações do perfil
+                let html = `
+                    <p><strong>Nome:</strong> ${profile.name}</p>
+                    <p><strong>Email:</strong> ${profile.email}</p>
+                    <p><strong>Telefone:</strong> ${profile.phone || 'Não informado'}</p>
+                    <p><strong>Documento:</strong> ${profile.professional?.document_number || 'Não informado'}</p>
+                `;
+                
+                profileInfo.innerHTML = html;
+                
+                // Preencher status de aprovação
+                if (profile.professional) {
+                    let statusHtml = '';
+                    let statusClass = '';
+                    let statusText = '';
+                    
+                    if (profile.professional.is_approved === true) {
+                        statusClass = 'status-approved';
+                        statusText = 'Aprovado';
+                    } else if (profile.professional.is_approved === false) {
+                        statusClass = 'status-rejected';
+                        statusText = 'Rejeitado';
+                    } else {
+                        statusClass = 'status-pending';
+                        statusText = 'Pendente de Aprovação';
+                    }
+                    
+                    statusHtml = `
+                        <div class="text-center">
+                            <span class="status-badge ${statusClass}">${statusText}</span>
+                        </div>
+                    `;
+                    
+                    if (profile.professional.rejection_reason) {
+                        statusHtml += `
+                            <div class="mt-3">
+                                <strong>Motivo da rejeição:</strong>
+                                <p>${profile.professional.rejection_reason}</p>
+                            </div>
+                        `;
+                    }
+                    
+                    approvalStatus.innerHTML = statusHtml;
+                } else {
+                    approvalStatus.innerHTML = '<div class="alert alert-warning">Informações de aprovação não disponíveis.</div>';
+                }
+                
+                // Preencher atividades
+                if (profile.professional && profile.professional.activities && profile.professional.activities.length > 0) {
+                    let activitiesHtml = '';
+                    
+                    profile.professional.activities.forEach(activity => {
+                        activitiesHtml += `
+                            <div class="card mb-3">
+                                <div class="card-header">
+                                    <strong>${activity.activity_name}</strong>
+                                </div>
+                                <div class="card-body">
+                                    <p>${activity.description || 'Sem descrição'}</p>
+                                    <div class="row">
+                                        <div class="col-md-6">
+                                            <p><strong>Experiência:</strong> ${activity.experience_years || '0'} anos</p>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <p><strong>Preço:</strong> R$ ${activity.price || '0.00'}</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        `;
+                    });
+                    
+                    activitiesContainer.innerHTML = activitiesHtml;
+                } else {
+                    activitiesContainer.innerHTML = '<div class="alert alert-info">Você ainda não possui especialidades cadastradas.</div>';
+                }
+                
+                // Preencher formulário de edição
+                document.getElementById('edit-name').value = profile.name || '';
+                document.getElementById('edit-phone').value = profile.phone || '';
+                document.getElementById('edit-bio').value = profile.professional?.bio || '';
+                
+            } catch (error) {
+                profileInfo.innerHTML = `
+                    <div class="alert alert-danger">
+                        Erro ao carregar perfil: ${error.message || 'Tente novamente mais tarde.'}
+                    </div>
+                `;
+            }
+        }
+        
+        async function loadAvailableActivities() {
+            const activitySelect = document.getElementById('activity-select');
+            
+            try {
+                const activities = await window.api.getActivities();
+                
+                // Limpar opções existentes
+                activitySelect.innerHTML = '<option value="">Selecione uma especialidade</option>';
+                
+                // Adicionar novas opções
+                activities.forEach(activity => {
+                    const option = document.createElement('option');
+                    option.value = activity.id;
+                    option.textContent = activity.name;
+                    activitySelect.appendChild(option);
+                });
+                
+            } catch (error) {
+                console.error('Erro ao carregar atividades disponíveis:', error);
+            }
+        }
+        
+        async function updateProfile() {
+            const name = document.getElementById('edit-name').value;
+            const phone = document.getElementById('edit-phone').value;
+            const bio = document.getElementById('edit-bio').value;
+            
+            const alertContainer = document.getElementById('edit-alert');
+            
+            try {
+                alertContainer.innerHTML = '<div class="alert alert-info">Atualizando perfil...</div>';
+                
+                // Simulação de atualização (API real seria implementada aqui)
+                await new Promise(resolve => setTimeout(resolve, 1000));
+                
+                alertContainer.innerHTML = '<div class="alert alert-success">Perfil atualizado com sucesso!</div>';
+                
+                // Recarregar perfil
+                loadProfile();
+                
+            } catch (error) {
+                alertContainer.innerHTML = `<div class="alert alert-danger">${error.message || 'Erro ao atualizar perfil. Tente novamente.'}</div>`;
+            }
+        }
+        
+        async function addActivity() {
+            const activityId = document.getElementById('activity-select').value;
+            const description = document.getElementById('activity-description').value;
+            const experience = document.getElementById('activity-experience').value;
+            const price = document.getElementById('activity-price').value;
+            
+            const alertContainer = document.getElementById('activity-alert');
+            
+            if (!activityId) {
+                alertContainer.innerHTML = '<div class="alert alert-danger">Selecione uma especialidade.</div>';
+                return;
+            }
+            
+            try {
+                alertContainer.innerHTML = '<div class="alert alert-info">Adicionando especialidade...</div>';
+                
+                // Simulação de adição (API real seria implementada aqui)
+                await new Promise(resolve => setTimeout(resolve, 1000));
+                
+                alertContainer.innerHTML = '<div class="alert alert-success">Especialidade adicionada com sucesso!</div>';
+                
+                // Limpar formulário
+                document.getElementById('activity-select').value = '';
+                document.getElementById('activity-description').value = '';
+                document.getElementById('activity-experience').value = '';
+                document.getElementById('activity-price').value = '';
+                
+                // Recarregar perfil
+                loadProfile();
+                
+                // Fechar modal após 1 segundo
+                setTimeout(() => {
+                    const modal = bootstrap.Modal.getInstance(document.getElementById('addActivityModal'));
+                    modal.hide();
+                    alertContainer.innerHTML = '';
+                }, 1000);
+                
+            } catch (error) {
+                alertContainer.innerHTML = `<div class="alert alert-danger">${error.message || 'Erro ao adicionar especialidade. Tente novamente.'}</div>`;
+            }
+        }
+    </script>
+</body>
+</html>

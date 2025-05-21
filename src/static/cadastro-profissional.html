@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cadastro de Profissional - Saúde Connect</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="css/styles.css" rel="stylesheet">
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark">
+        <div class="container">
+            <a class="navbar-brand" href="index.html">Saúde Connect</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="index.html">Início</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="busca.html">Buscar Profissionais</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="cadastro-paciente.html">Cadastro Paciente</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active" href="cadastro-profissional.html">Cadastro Profissional</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="login.html">Login</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <section class="py-5 bg-light">
+        <div class="container">
+            <h2 class="section-title text-center">Cadastro de Profissional</h2>
+            <div class="row justify-content-center">
+                <div class="col-md-8">
+                    <div class="card feature-card p-4">
+                        <div class="card-body">
+                            <div id="alert-container"></div>
+                            <form id="professional-form">
+                                <div class="mb-3">
+                                    <label for="name" class="form-label">Nome Completo</label>
+                                    <input type="text" class="form-control" id="name" required>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="email" class="form-label">Email</label>
+                                    <input type="email" class="form-control" id="email" required>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="password" class="form-label">Senha</label>
+                                    <input type="password" class="form-control" id="password" required>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="confirm-password" class="form-label">Confirmar Senha</label>
+                                    <input type="password" class="form-control" id="confirm-password" required>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="phone" class="form-label">Telefone</label>
+                                    <input type="tel" class="form-control" id="phone">
+                                </div>
+                                <div class="mb-3">
+                                    <label for="document_number" class="form-label">CPF/Documento Profissional</label>
+                                    <input type="text" class="form-control" id="document_number" required>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="diploma" class="form-label">Diploma (PDF, JPG, PNG)</label>
+                                    <input type="file" class="form-control" id="diploma" accept=".pdf,.jpg,.jpeg,.png" required>
+                                    <div class="form-text">Envie seu diploma ou certificado profissional para verificação.</div>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="bio" class="form-label">Biografia Profissional</label>
+                                    <textarea class="form-control" id="bio" rows="3"></textarea>
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <label class="form-label">Especialidades/Atividades</label>
+                                    <div id="activities-container">
+                                        <div class="alert alert-info">Carregando especialidades...</div>
+                                    </div>
+                                </div>
+                                
+                                <div id="selected-activities" class="mb-3">
+                                    <!-- Atividades selecionadas serão adicionadas aqui -->
+                                </div>
+                                
+                                <div id="activity-details" class="mb-3">
+                                    <!-- Detalhes das atividades selecionadas serão adicionados aqui -->
+                                </div>
+                                
+                                <button type="submit" class="btn btn-primary w-100">Cadastrar</button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <footer>
+        <div class="container">
+            <div class="row">
+                <div class="col-md-4 mb-4 mb-md-0">
+                    <h5>Saúde Connect</h5>
+                    <p>Conectando profissionais de saúde e pacientes de forma simples, segura e eficiente.</p>
+                </div>
+                <div class="col-md-4 mb-4 mb-md-0">
+                    <h5>Links Rápidos</h5>
+                    <ul class="list-unstyled footer-links">
+                        <li><a href="index.html">Início</a></li>
+                        <li><a href="busca.html">Buscar Profissionais</a></li>
+                        <li><a href="cadastro-paciente.html">Cadastro Paciente</a></li>
+                        <li><a href="cadastro-profissional.html">Cadastro Profissional</a></li>
+                    </ul>
+                </div>
+                <div class="col-md-4">
+                    <h5>Contato</h5>
+                    <ul class="list-unstyled footer-links">
+                        <li><a href="mailto:contato@saudeconnect.com">contato@saudeconnect.com</a></li>
+                        <li><a href="tel:+551199999999">(11) 9999-9999</a></li>
+                    </ul>
+                </div>
+            </div>
+            <hr class="mt-4 mb-3">
+            <div class="text-center">
+                <p class="mb-0">&copy; 2025 Saúde Connect. Todos os direitos reservados.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="js/api.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Verificar se o usuário já está autenticado
+            if (window.api.isAuthenticated()) {
+                window.location.href = 'index.html';
+            }
+            
+            const selectedActivities = new Set();
+            
+            // Carregar atividades disponíveis
+            async function loadActivities() {
+                try {
+                    const activities = await window.api.getActivities();
+                    const activitiesContainer = document.getElementById('activities-container');
+                    
+                    if (activities.length === 0) {
+                        activitiesContainer.innerHTML = '<div class="alert alert-warning">Nenhuma especialidade disponível no momento.</div>';
+                        return;
+                    }
+                    
+                    let html = '<div class="row">';
+                    activities.forEach(activity => {
+                        html += `
+                            <div class="col-md-6 mb-2">
+                                <div class="form-check">
+                                    <input class="form-check-input activity-checkbox" type="checkbox" value="${activity.id}" id="activity-${activity.id}">
+                                    <label class="form-check-label" for="activity-${activity.id}">
+                                        ${activity.name}
+                                    </label>
+                                </div>
+                            </div>
+                        `;
+                    });
+                    html += '</div>';
+                    
+                    activitiesContainer.innerHTML = html;
+                    
+                    // Adicionar event listeners para os checkboxes
+                    document.querySelectorAll('.activity-checkbox').forEach(checkbox => {
+                        checkbox.addEventListener('change', function() {
+                            const activityId = this.value;
+                            const activityName = this.nextElementSibling.textContent.trim();
+                            
+                            if (this.checked) {
+                                selectedActivities.add(activityId);
+                                addActivityDetails(activityId, activityName);
+                            } else {
+                                selectedActivities.delete(activityId);
+                                removeActivityDetails(activityId);
+                            }
+                            
+                            updateSelectedActivities();
+                        });
+                    });
+                    
+                } catch (error) {
+                    document.getElementById('activities-container').innerHTML = `
+                        <div class="alert alert-danger">
+                            Erro ao carregar especialidades: ${error.message || 'Tente novamente mais tarde.'}
+                        </div>
+                    `;
+                }
+            }
+            
+            function addActivityDetails(activityId, activityName) {
+                const activityDetails = document.getElementById('activity-details');
+                
+                const detailsHtml = `
+                    <div class="card mb-3 activity-detail" id="detail-${activityId}">
+                        <div class="card-header">
+                            <strong>${activityName}</strong>
+                        </div>
+                        <div class="card-body">
+                            <div class="mb-3">
+                                <label class="form-label">Descrição do serviço</label>
+                                <textarea class="form-control" id="description-${activityId}" rows="2" placeholder="Descreva este serviço"></textarea>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label">Anos de experiência</label>
+                                    <input type="number" class="form-control" id="experience-${activityId}" min="0" placeholder="Ex: 5">
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label">Preço (R$)</label>
+                                    <input type="number" class="form-control" id="price-${activityId}" min="0" step="0.01" placeholder="Ex: 150.00">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                
+                activityDetails.innerHTML += detailsHtml;
+            }
+            
+            function removeActivityDetails(activityId) {
+                const detailElement = document.getElementById(`detail-${activityId}`);
+                if (detailElement) {
+                    detailElement.remove();
+                }
+            }
+            
+            function updateSelectedActivities() {
+                const selectedActivitiesContainer = document.getElementById('selected-activities');
+                
+                if (selectedActivities.size === 0) {
+                    selectedActivitiesContainer.innerHTML = '';
+                    return;
+                }
+                
+                let html = '<label class="form-label">Especialidades selecionadas:</label><div>';
+                
+                document.querySelectorAll('.activity-checkbox:checked').forEach(checkbox => {
+                    const activityName = checkbox.nextElementSibling.textContent.trim();
+                    html += `<span class="activity-badge">${activityName}</span>`;
+                });
+                
+                html += '</div>';
+                selectedActivitiesContainer.innerHTML = html;
+            }
+            
+            // Carregar atividades ao iniciar
+            loadActivities();
+
+            // Processar o formulário de cadastro
+            document.getElementById('professional-form').addEventListener('submit', async function(e) {
+                e.preventDefault();
+                
+                const name = document.getElementById('name').value;
+                const email = document.getElementById('email').value;
+                const password = document.getElementById('password').value;
+                const confirmPassword = document.getElementById('confirm-password').value;
+                const phone = document.getElementById('phone').value;
+                const documentNumber = document.getElementById('document_number').value;
+                const diploma = document.getElementById('diploma').files[0];
+                const bio = document.getElementById('bio').value;
+                
+                const alertContainer = document.getElementById('alert-container');
+                
+                // Validar senha
+                if (password !== confirmPassword) {
+                    alertContainer.innerHTML = '<div class="alert alert-danger">As senhas não coincidem.</div>';
+                    return;
+                }
+                
+                // Validar se pelo menos uma atividade foi selecionada
+                if (selectedActivities.size === 0) {
+                    alertContainer.innerHTML = '<div class="alert alert-danger">Selecione pelo menos uma especialidade/atividade.</div>';
+                    return;
+                }
+                
+                try {
+                    alertContainer.innerHTML = '<div class="alert alert-info">Processando cadastro...</div>';
+                    
+                    // Criar FormData para envio de arquivo
+                    const formData = new FormData();
+                    formData.append('name', name);
+                    formData.append('email', email);
+                    formData.append('password', password);
+                    formData.append('phone', phone);
+                    formData.append('document_number', documentNumber);
+                    formData.append('diploma', diploma);
+                    formData.append('bio', bio);
+                    
+                    // Adicionar atividades selecionadas
+                    selectedActivities.forEach(activityId => {
+                        formData.append('activities[]', activityId);
+                        
+                        const description = document.getElementById(`description-${activityId}`).value;
+                        const experience = document.getElementById(`experience-${activityId}`).value;
+                        const price = document.getElementById(`price-${activityId}`).value;
+                        
+                        formData.append('descriptions[]', description);
+                        formData.append('experience_years[]', experience);
+                        formData.append('prices[]', price);
+                    });
+                    
+                    const data = await window.api.registerProfessional(formData);
+                    
+                    alertContainer.innerHTML = '<div class="alert alert-success">Cadastro realizado com sucesso! Seu perfil será analisado pela nossa equipe. Redirecionando para o login...</div>';
+                    
+                    // Redirecionar para o login
+                    setTimeout(() => {
+                        window.location.href = 'login.html';
+                    }, 3000);
+                    
+                } catch (error) {
+                    alertContainer.innerHTML = `<div class="alert alert-danger">${error.message || 'Erro ao cadastrar. Verifique os dados e tente novamente.'}</div>`;
+                }
+            });
+        });
+    </script>
+</body>
+</html>
