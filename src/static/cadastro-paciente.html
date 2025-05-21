@@ -125,6 +125,28 @@
         </div>
     </section>
 
+    <!-- Modal de Confirmação de Cadastro -->
+    <div class="modal fade" id="successModal" tabindex="-1" aria-labelledby="successModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header bg-success text-white">
+                    <h5 class="modal-title" id="successModalLabel">Cadastro Realizado com Sucesso!</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Fechar"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="text-center mb-4">
+                        <i class="bi bi-check-circle-fill text-success" style="font-size: 3rem;"></i>
+                    </div>
+                    <p class="text-center">Seu cadastro foi realizado com sucesso!</p>
+                    <p class="text-center">Agora você pode fazer login e começar a buscar profissionais.</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-primary" id="goToLogin">Ir para Login</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <footer>
         <div class="container">
             <div class="row">
@@ -160,9 +182,21 @@
     <script src="js/api.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            // Verificar se o usuário já está autenticado
-            if (window.api.isAuthenticated()) {
-                window.location.href = 'index.html';
+            // Limpar qualquer localStorage corrompido antes de verificar autenticação
+            try {
+                // Verificar se o usuário já está autenticado com validação rigorosa
+                if (window.api.isAuthenticated()) {
+                    const userType = window.api.getUserType();
+                    if (userType) {
+                        window.location.href = 'index.html';
+                    } else {
+                        // Se o tipo de usuário for inválido, fazer logout
+                        window.api.logout();
+                    }
+                }
+            } catch (e) {
+                console.error('Erro ao verificar autenticação:', e);
+                window.api.logout(); // Garantir limpeza em caso de erro
             }
 
             // Processar o formulário de cadastro
@@ -205,12 +239,18 @@
                     
                     const data = await window.api.registerPatient(patientData);
                     
-                    alertContainer.innerHTML = '<div class="alert alert-success">Cadastro realizado com sucesso! Redirecionando para o login...</div>';
+                    // Mostrar modal de sucesso em vez de redirecionamento automático
+                    const successModal = new bootstrap.Modal(document.getElementById('successModal'));
+                    successModal.show();
                     
-                    // Redirecionar para o login
-                    setTimeout(() => {
+                    // Limpar formulário
+                    document.getElementById('patient-form').reset();
+                    alertContainer.innerHTML = '';
+                    
+                    // Configurar botão para ir para login
+                    document.getElementById('goToLogin').addEventListener('click', function() {
                         window.location.href = 'login.html';
-                    }, 2000);
+                    });
                     
                 } catch (error) {
                     alertContainer.innerHTML = `<div class="alert alert-danger">${error.message || 'Erro ao cadastrar. Verifique os dados e tente novamente.'}</div>`;

@@ -33,15 +33,65 @@ window.api = {
     logout: function() {
         localStorage.removeItem('token');
         localStorage.removeItem('userData');
+        // Garantir que todos os dados de autenticação sejam removidos
+        localStorage.removeItem('authState');
     },
     
     isAuthenticated: function() {
-        return !!localStorage.getItem('token');
+        try {
+            const token = localStorage.getItem('token');
+            const userData = localStorage.getItem('userData');
+            
+            // Verificação mais rigorosa para evitar falsos positivos
+            if (!token || !userData) {
+                this.logout(); // Garantir limpeza completa
+                return false;
+            }
+            
+            // Tentar analisar os dados do usuário para garantir que são válidos
+            try {
+                const user = JSON.parse(userData);
+                if (!user || !user.id || !user.email || !user.user_type) {
+                    this.logout(); // Limpar dados inválidos
+                    return false;
+                }
+                
+                // Verificar se o token não está vazio ou malformado
+                if (token.length < 10) {
+                    this.logout();
+                    return false;
+                }
+                
+                return true;
+            } catch (e) {
+                this.logout(); // Limpar dados corrompidos
+                return false;
+            }
+        } catch (e) {
+            // Em caso de erro (como acesso bloqueado ao localStorage), retornar false
+            console.error('Erro ao verificar autenticação:', e);
+            this.logout(); // Garantir limpeza
+            return false;
+        }
     },
     
     getUserData: function() {
-        const userData = localStorage.getItem('userData');
-        return userData ? JSON.parse(userData) : null;
+        try {
+            const userData = localStorage.getItem('userData');
+            return userData ? JSON.parse(userData) : null;
+        } catch (e) {
+            this.logout(); // Limpar dados corrompidos
+            return null;
+        }
+    },
+    
+    getUserType: function() {
+        try {
+            const userData = this.getUserData();
+            return userData ? userData.user_type : null;
+        } catch (e) {
+            return null;
+        }
     },
     
     getToken: function() {

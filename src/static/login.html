@@ -94,16 +94,25 @@
     <script src="js/api.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            // Verificar se o usuário já está autenticado
-            if (window.api.isAuthenticated()) {
-                const userType = window.api.getUserType();
-                if (userType === 'admin') {
-                    window.location.href = 'admin.html';
-                } else if (userType === 'professional') {
-                    window.location.href = 'perfil-profissional.html';
-                } else if (userType === 'patient') {
-                    window.location.href = 'perfil-paciente.html';
+            // Limpar qualquer localStorage corrompido antes de verificar autenticação
+            try {
+                // Verificar se o usuário já está autenticado com validação rigorosa
+                if (window.api.isAuthenticated()) {
+                    const userType = window.api.getUserType();
+                    if (userType === 'admin') {
+                        window.location.href = 'admin.html';
+                    } else if (userType === 'professional') {
+                        window.location.href = 'perfil-profissional.html';
+                    } else if (userType === 'patient') {
+                        window.location.href = 'perfil-paciente.html';
+                    } else {
+                        // Se o tipo de usuário for inválido, fazer logout
+                        window.api.logout();
+                    }
                 }
+            } catch (e) {
+                console.error('Erro ao verificar autenticação:', e);
+                window.api.logout(); // Garantir limpeza em caso de erro
             }
 
             // Processar o formulário de login
