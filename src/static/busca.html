@@ -171,6 +171,11 @@
                 const activities = await window.api.getActivities();
                 const activitySelect = document.getElementById('activity');
                 
+                // Limpar opções existentes, mantendo apenas a opção padrão
+                while (activitySelect.options.length > 1) {
+                    activitySelect.remove(1);
+                }
+                
                 activities.forEach(activity => {
                     const option = document.createElement('option');
                     option.value = activity.id;
@@ -179,24 +184,43 @@
                 });
             } catch (error) {
                 console.error('Erro ao carregar atividades:', error);
+                // Mostrar mensagem de erro na interface
+                const resultsContainer = document.getElementById('results-container');
+                resultsContainer.innerHTML = `
+                    <div class="alert alert-danger">
+                        Erro ao carregar especialidades: ${error.message || 'Tente novamente mais tarde.'}
+                    </div>
+                `;
             }
         }
         
         async function loadCategories() {
             try {
-                const categories = await window.api.getActivityCategories();
+                const categories = await window.api.getCategories();
                 const categorySelect = document.getElementById('category');
                 
+                // Limpar opções existentes, mantendo apenas a opção padrão
+                while (categorySelect.options.length > 1) {
+                    categorySelect.remove(1);
+                }
+                
                 categories.forEach(category => {
-                    if (category) { // Verificar se a categoria não é nula
+                    if (category && category.name) {
                         const option = document.createElement('option');
-                        option.value = category;
-                        option.textContent = category;
+                        option.value = category.id;
+                        option.textContent = category.name;
                         categorySelect.appendChild(option);
                     }
                 });
             } catch (error) {
                 console.error('Erro ao carregar categorias:', error);
+                // Mostrar mensagem de erro na interface
+                const resultsContainer = document.getElementById('results-container');
+                resultsContainer.innerHTML = `
+                    <div class="alert alert-danger">
+                        Erro ao carregar categorias: ${error.message || 'Tente novamente mais tarde.'}
+                    </div>
+                `;
             }
         }
         
@@ -208,11 +232,15 @@
             resultsContainer.innerHTML = '<div class="text-center py-5"><p>Buscando profissionais...</p></div>';
             
             try {
-                const professionals = await window.api.searchProfessionals(activityId, category);
+                const filters = {};
+                if (activityId) filters.activity = activityId;
+                if (category) filters.category = category;
                 
-                if (professionals.length === 0) {
+                const professionals = await window.api.searchProfessionals(filters);
+                
+                if (!professionals || professionals.length === 0) {
                     resultsContainer.innerHTML = `
-                        <div class="text-center py-5">
+                        <div class="alert alert-info">
                             <p>Nenhum profissional encontrado com os filtros selecionados.</p>
                         </div>
                     `;
@@ -241,9 +269,9 @@
                                         <span>
                                             <i class="bi bi-telephone"></i> ${prof.phone || 'Não informado'}
                                         </span>
-                                        <button class="btn btn-sm btn-primary" onclick="showProfessionalDetails(${prof.id})">
+                                        <a href="detalhes-profissional.html?id=${prof.id}" class="btn btn-sm btn-primary">
                                             Ver detalhes
-                                        </button>
+                                        </a>
                                     </div>
                                 </div>
                             </div>
@@ -255,6 +283,7 @@
                 resultsContainer.innerHTML = html;
                 
             } catch (error) {
+                console.error('Erro ao buscar profissionais:', error);
                 resultsContainer.innerHTML = `
                     <div class="alert alert-danger">
                         Erro ao buscar profissionais: ${error.message || 'Tente novamente mais tarde.'}

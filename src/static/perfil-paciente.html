@@ -212,31 +212,27 @@
                     <p><strong>Nome:</strong> ${profile.name}</p>
                     <p><strong>Email:</strong> ${profile.email}</p>
                     <p><strong>Telefone:</strong> ${profile.phone || 'Não informado'}</p>
-                    <p><strong>CPF:</strong> ${profile.patient?.document_number || 'Não informado'}</p>
+                    <p><strong>CPF:</strong> ${profile.document_number || 'Não informado'}</p>
                 `;
                 
-                if (profile.patient) {
-                    html += `
-                        <p><strong>Data de Nascimento:</strong> ${profile.patient.birth_date || 'Não informada'}</p>
-                        <p><strong>Endereço:</strong> ${profile.patient.address || 'Não informado'}</p>
-                        <p><strong>Cidade/Estado:</strong> ${profile.patient.city || 'Não informada'}${profile.patient.state ? '/' + profile.patient.state : ''}</p>
-                    `;
-                }
+                html += `
+                    <p><strong>Data de Nascimento:</strong> ${profile.birth_date || 'Não informada'}</p>
+                    <p><strong>Endereço:</strong> ${profile.address || 'Não informado'}</p>
+                    <p><strong>Cidade/Estado:</strong> ${profile.city || 'Não informada'}${profile.state ? '/' + profile.state : ''}</p>
+                `;
                 
                 profileInfo.innerHTML = html;
                 
                 // Preencher formulário de edição
                 document.getElementById('edit-name').value = profile.name || '';
                 document.getElementById('edit-phone').value = profile.phone || '';
-                
-                if (profile.patient) {
-                    document.getElementById('edit-birth-date').value = profile.patient.birth_date || '';
-                    document.getElementById('edit-address').value = profile.patient.address || '';
-                    document.getElementById('edit-city').value = profile.patient.city || '';
-                    document.getElementById('edit-state').value = profile.patient.state || '';
-                }
+                document.getElementById('edit-birth-date').value = profile.birth_date || '';
+                document.getElementById('edit-address').value = profile.address || '';
+                document.getElementById('edit-city').value = profile.city || '';
+                document.getElementById('edit-state').value = profile.state || '';
                 
             } catch (error) {
+                console.error('Erro ao carregar perfil:', error);
                 profileInfo.innerHTML = `
                     <div class="alert alert-danger">
                         Erro ao carregar perfil: ${error.message || 'Tente novamente mais tarde.'}
@@ -258,8 +254,16 @@
             try {
                 alertContainer.innerHTML = '<div class="alert alert-info">Atualizando perfil...</div>';
                 
-                // Simulação de atualização (API real seria implementada aqui)
-                await new Promise(resolve => setTimeout(resolve, 1000));
+                const profileData = {
+                    name,
+                    phone,
+                    birth_date: birthDate,
+                    address,
+                    city,
+                    state
+                };
+                
+                await window.api.updateUserProfile(profileData);
                 
                 alertContainer.innerHTML = '<div class="alert alert-success">Perfil atualizado com sucesso!</div>';
                 
@@ -267,6 +271,7 @@
                 loadProfile();
                 
             } catch (error) {
+                console.error('Erro ao atualizar perfil:', error);
                 alertContainer.innerHTML = `<div class="alert alert-danger">${error.message || 'Erro ao atualizar perfil. Tente novamente.'}</div>`;
             }
         }

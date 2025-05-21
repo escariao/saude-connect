@@ -216,6 +216,12 @@
                 
                 const alertContainer = document.getElementById('alert-container');
                 
+                // Validar campos obrigatórios
+                if (!name || !email || !password || !documentNumber) {
+                    alertContainer.innerHTML = '<div class="alert alert-danger">Preencha todos os campos obrigatórios.</div>';
+                    return;
+                }
+                
                 // Validar senha
                 if (password !== confirmPassword) {
                     alertContainer.innerHTML = '<div class="alert alert-danger">As senhas não coincidem.</div>';
@@ -253,6 +259,7 @@
                     });
                     
                 } catch (error) {
+                    console.error('Erro no cadastro:', error);
                     alertContainer.innerHTML = `<div class="alert alert-danger">${error.message || 'Erro ao cadastrar. Verifique os dados e tente novamente.'}</div>`;
                 }
             });
