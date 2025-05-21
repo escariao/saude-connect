@@ -1,0 +1,459 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Saúde Connect - Conectando Profissionais e Pacientes</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #2c7da0;
+            --secondary-color: #468faf;
+            --accent-color: #61a5c2;
+            --light-color: #a9d6e5;
+            --dark-color: #012a4a;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            color: #333;
+            background-color: #f8f9fa;
+        }
+        
+        .navbar {
+            background-color: var(--primary-color);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .navbar-brand {
+            font-weight: 700;
+            color: white !important;
+        }
+        
+        .nav-link {
+            color: rgba(255,255,255,0.85) !important;
+            font-weight: 500;
+        }
+        
+        .nav-link:hover {
+            color: white !important;
+        }
+        
+        .hero {
+            background: linear-gradient(135deg, var(--primary-color), var(--dark-color));
+            color: white;
+            padding: 80px 0;
+            margin-bottom: 40px;
+        }
+        
+        .hero h1 {
+            font-weight: 700;
+            font-size: 2.8rem;
+            margin-bottom: 20px;
+        }
+        
+        .hero p {
+            font-size: 1.2rem;
+            opacity: 0.9;
+            max-width: 600px;
+            margin: 0 auto 30px;
+        }
+        
+        .btn-primary {
+            background-color: var(--accent-color);
+            border-color: var(--accent-color);
+            padding: 10px 24px;
+            font-weight: 600;
+        }
+        
+        .btn-primary:hover {
+            background-color: var(--secondary-color);
+            border-color: var(--secondary-color);
+        }
+        
+        .btn-outline-light {
+            font-weight: 600;
+            padding: 10px 24px;
+        }
+        
+        .feature-card {
+            border: none;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            height: 100%;
+        }
+        
+        .feature-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+        }
+        
+        .feature-icon {
+            font-size: 2.5rem;
+            color: var(--primary-color);
+            margin-bottom: 20px;
+        }
+        
+        .section-title {
+            color: var(--dark-color);
+            font-weight: 700;
+            margin-bottom: 50px;
+            position: relative;
+            display: inline-block;
+        }
+        
+        .section-title:after {
+            content: '';
+            position: absolute;
+            bottom: -10px;
+            left: 0;
+            width: 60px;
+            height: 3px;
+            background-color: var(--accent-color);
+        }
+        
+        footer {
+            background-color: var(--dark-color);
+            color: white;
+            padding: 40px 0;
+        }
+        
+        .footer-links a {
+            color: rgba(255,255,255,0.8);
+            text-decoration: none;
+            transition: color 0.2s;
+        }
+        
+        .footer-links a:hover {
+            color: white;
+        }
+        
+        .login-container {
+            max-width: 400px;
+            margin: 40px auto;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            background-color: white;
+        }
+        
+        .form-control:focus {
+            border-color: var(--accent-color);
+            box-shadow: 0 0 0 0.25rem rgba(97, 165, 194, 0.25);
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark">
+        <div class="container">
+            <a class="navbar-brand" href="#">Saúde Connect</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="#">Início</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#como-funciona">Como Funciona</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#especialidades">Especialidades</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#cadastro">Cadastre-se</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#login">Login</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <section class="hero text-center">
+        <div class="container">
+            <h1>Conectando Pacientes e Profissionais de Saúde</h1>
+            <p>Encontre o profissional ideal para suas necessidades ou ofereça seus serviços como freelancer na área da saúde.</p>
+            <div class="d-flex justify-content-center gap-3">
+                <a href="#cadastro-paciente" class="btn btn-primary">Sou Paciente</a>
+                <a href="#cadastro-profissional" class="btn btn-outline-light">Sou Profissional</a>
+            </div>
+        </div>
+    </section>
+
+    <section id="como-funciona" class="py-5">
+        <div class="container">
+            <h2 class="section-title text-center mb-5">Como Funciona</h2>
+            <div class="row g-4">
+                <div class="col-md-4">
+                    <div class="card feature-card p-4 text-center">
+                        <div class="card-body">
+                            <div class="feature-icon">
+                                <i class="fas fa-user-md"></i>
+                                <!-- Placeholder for icon -->
+                                <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" fill="currentColor" class="bi bi-person-badge" viewBox="0 0 16 16">
+                                    <path d="M6.5 2a.5.5 0 0 0 0 1h3a.5.5 0 0 0 0-1zM11 8a3 3 0 1 1-6 0 3 3 0 0 1 6 0"/>
+                                    <path d="M4.5 0A2.5 2.5 0 0 0 2 2.5V14a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2V2.5A2.5 2.5 0 0 0 11.5 0zM3 2.5A1.5 1.5 0 0 1 4.5 1h7A1.5 1.5 0 0 1 13 2.5v10.795a4.2 4.2 0 0 0-.776-.492C11.392 12.387 10.063 12 8 12s-3.392.387-4.224.803a4.2 4.2 0 0 0-.776.492z"/>
+                                </svg>
+                            </div>
+                            <h4>Cadastro Profissional</h4>
+                            <p>Profissionais de saúde cadastram seus serviços e especialidades, enviando seu diploma para verificação.</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card feature-card p-4 text-center">
+                        <div class="card-body">
+                            <div class="feature-icon">
+                                <i class="fas fa-clipboard-check"></i>
+                                <!-- Placeholder for icon -->
+                                <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" fill="currentColor" class="bi bi-check-circle" viewBox="0 0 16 16">
+                                    <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14m0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16"/>
+                                    <path d="m10.97 4.97-.708.707L7.5 8.44l-1.79-1.79-.707.707 2.5 2.5.007-.007.7-.7z"/>
+                                </svg>
+                            </div>
+                            <h4>Aprovação Administrativa</h4>
+                            <p>Nossa equipe verifica as credenciais e aprova os profissionais para garantir qualidade e segurança.</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card feature-card p-4 text-center">
+                        <div class="card-body">
+                            <div class="feature-icon">
+                                <i class="fas fa-search"></i>
+                                <!-- Placeholder for icon -->
+                                <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" fill="currentColor" class="bi bi-search" viewBox="0 0 16 16">
+                                    <path d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001q.044.06.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1 1 0 0 0-.115-.1zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0"/>
+                                </svg>
+                            </div>
+                            <h4>Busca Especializada</h4>
+                            <p>Pacientes encontram profissionais qualificados filtrando por especialidade e necessidades específicas.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="especialidades" class="py-5 bg-light">
+        <div class="container">
+            <h2 class="section-title text-center mb-5">Especialidades Disponíveis</h2>
+            <div class="row g-4">
+                <div class="col-md-3 col-6">
+                    <div class="card feature-card p-3 text-center">
+                        <div class="card-body">
+                            <h5>Enfermagem</h5>
+                            <p class="small">Cuidados gerais, medicação, acompanhamento</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3 col-6">
+                    <div class="card feature-card p-3 text-center">
+                        <div class="card-body">
+                            <h5>Fisioterapia</h5>
+                            <p class="small">Reabilitação, tratamentos específicos</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3 col-6">
+                    <div class="card feature-card p-3 text-center">
+                        <div class="card-body">
+                            <h5>Psicologia</h5>
+                            <p class="small">Atendimento especializado, terapias</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3 col-6">
+                    <div class="card feature-card p-3 text-center">
+                        <div class="card-body">
+                            <h5>Cuidador</h5>
+                            <p class="small">Acompanhamento de idosos e pacientes</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3 col-6">
+                    <div class="card feature-card p-3 text-center">
+                        <div class="card-body">
+                            <h5>Nutrição</h5>
+                            <p class="small">Orientação alimentar personalizada</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3 col-6">
+                    <div class="card feature-card p-3 text-center">
+                        <div class="card-body">
+                            <h5>Fonoaudiologia</h5>
+                            <p class="small">Tratamento de distúrbios da comunicação</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3 col-6">
+                    <div class="card feature-card p-3 text-center">
+                        <div class="card-body">
+                            <h5>Terapia Ocupacional</h5>
+                            <p class="small">Reabilitação e adaptação funcional</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3 col-6">
+                    <div class="card feature-card p-3 text-center">
+                        <div class="card-body">
+                            <h5>Psiquiatria</h5>
+                            <p class="small">Diagnóstico e tratamento mental</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="cadastro" class="py-5">
+        <div class="container">
+            <h2 class="section-title text-center mb-5">Cadastre-se</h2>
+            <div class="row">
+                <div class="col-md-6 mb-4">
+                    <div class="card feature-card p-4">
+                        <div class="card-body">
+                            <h3 id="cadastro-paciente" class="mb-4">Sou Paciente</h3>
+                            <form>
+                                <div class="mb-3">
+                                    <label for="patientName" class="form-label">Nome Completo</label>
+                                    <input type="text" class="form-control" id="patientName" required>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="patientEmail" class="form-label">Email</label>
+                                    <input type="email" class="form-control" id="patientEmail" required>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="patientPhone" class="form-label">Telefone</label>
+                                    <input type="tel" class="form-control" id="patientPhone">
+                                </div>
+                                <div class="mb-3">
+                                    <label for="patientDocument" class="form-label">CPF</label>
+                                    <input type="text" class="form-control" id="patientDocument" required>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="patientPassword" class="form-label">Senha</label>
+                                    <input type="password" class="form-control" id="patientPassword" required>
+                                </div>
+                                <button type="submit" class="btn btn-primary w-100">Cadastrar como Paciente</button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="card feature-card p-4">
+                        <div class="card-body">
+                            <h3 id="cadastro-profissional" class="mb-4">Sou Profissional</h3>
+                            <form>
+                                <div class="mb-3">
+                                    <label for="profName" class="form-label">Nome Completo</label>
+                                    <input type="text" class="form-control" id="profName" required>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="profEmail" class="form-label">Email</label>
+                                    <input type="email" class="form-control" id="profEmail" required>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="profPhone" class="form-label">Telefone</label>
+                                    <input type="tel" class="form-control" id="profPhone">
+                                </div>
+                                <div class="mb-3">
+                                    <label for="profDocument" class="form-label">CPF/Documento Profissional</label>
+                                    <input type="text" class="form-control" id="profDocument" required>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="profDiploma" class="form-label">Diploma (PDF, JPG, PNG)</label>
+                                    <input type="file" class="form-control" id="profDiploma" required>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="profSpecialties" class="form-label">Especialidades</label>
+                                    <select class="form-select" id="profSpecialties" multiple>
+                                        <option value="1">Enfermagem</option>
+                                        <option value="2">Fisioterapia</option>
+                                        <option value="3">Psicologia</option>
+                                        <option value="4">Cuidador</option>
+                                        <option value="5">Nutrição</option>
+                                        <option value="6">Fonoaudiologia</option>
+                                        <option value="7">Terapia Ocupacional</option>
+                                        <option value="8">Psiquiatria</option>
+                                    </select>
+                                    <div class="form-text">Pressione Ctrl para selecionar múltiplas especialidades</div>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="profBio" class="form-label">Biografia Profissional</label>
+                                    <textarea class="form-control" id="profBio" rows="3"></textarea>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="profPassword" class="form-label">Senha</label>
+                                    <input type="password" class="form-control" id="profPassword" required>
+                                </div>
+                                <button type="submit" class="btn btn-primary w-100">Cadastrar como Profissional</button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="login" class="py-5 bg-light">
+        <div class="container">
+            <div class="login-container">
+                <h2 class="text-center mb-4">Login</h2>
+                <form>
+                    <div class="mb-3">
+                        <label for="loginEmail" class="form-label">Email</label>
+                        <input type="email" class="form-control" id="loginEmail" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="loginPassword" class="form-label">Senha</label>
+                        <input type="password" class="form-control" id="loginPassword" required>
+                    </div>
+                    <button type="submit" class="btn btn-primary w-100">Entrar</button>
+                    <div class="text-center mt-3">
+                        <a href="#" class="text-decoration-none">Esqueceu sua senha?</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </section>
+
+    <footer>
+        <div class="container">
+            <div class="row">
+                <div class="col-md-4 mb-4 mb-md-0">
+                    <h5>Saúde Connect</h5>
+                    <p>Conectando profissionais de saúde e pacientes de forma simples, segura e eficiente.</p>
+                </div>
+                <div class="col-md-4 mb-4 mb-md-0">
+                    <h5>Links Rápidos</h5>
+                    <ul class="list-unstyled footer-links">
+                        <li><a href="#">Início</a></li>
+                        <li><a href="#como-funciona">Como Funciona</a></li>
+                        <li><a href="#especialidades">Especialidades</a></li>
+                        <li><a href="#cadastro">Cadastre-se</a></li>
+                    </ul>
+                </div>
+                <div class="col-md-4">
+                    <h5>Contato</h5>
+                    <ul class="list-unstyled footer-links">
+                        <li><a href="mailto:contato@saudeconnect.com">contato@saudeconnect.com</a></li>
+                        <li><a href="tel:+551199999999">(11) 9999-9999</a></li>
+                    </ul>
+                </div>
+            </div>
+            <hr class="mt-4 mb-3">
+            <div class="text-center">
+                <p class="mb-0">&copy; 2025 Saúde Connect. Todos os direitos reservados.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
