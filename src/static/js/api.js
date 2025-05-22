@@ -59,7 +59,7 @@ window.api = {
             const data = await response.json();
             
             if (!response.ok) {
-                throw new Error(data.error || 'Erro ao fazer login');
+                throw new Error(data.message || data.error || 'Erro ao fazer login');
             }
             
             // Armazenar token e dados do usuário
@@ -93,7 +93,7 @@ window.api = {
             const data = await response.json();
             
             if (!response.ok) {
-                throw new Error(data.error || 'Erro ao cadastrar paciente');
+                throw new Error(data.message || data.error || 'Erro ao cadastrar paciente');
             }
             
             return data;
@@ -104,24 +104,10 @@ window.api = {
     },
     
     // Método para cadastrar profissional
-    registerProfessional: async function(professionalData) {
+    registerProfessional: async function(formData) {
         try {
-            // Criar FormData para envio de arquivos
-            const formData = new FormData();
-            
-            // Adicionar dados do profissional
-            Object.keys(professionalData).forEach(key => {
-                if (key !== 'diploma') {
-                    formData.append(key, professionalData[key]);
-                }
-            });
-            
-            // Adicionar diploma se existir
-            if (professionalData.diploma) {
-                formData.append('diploma', professionalData.diploma);
-            }
-            
-            const response = await fetch(`${this.baseUrl}/professional/register`, {
+            // FormData já deve estar pronto para envio
+            const response = await fetch(`${this.baseUrl}/auth/register/professional`, {
                 method: 'POST',
                 body: formData
             });
@@ -129,7 +115,7 @@ window.api = {
             const data = await response.json();
             
             if (!response.ok) {
-                throw new Error(data.error || 'Erro ao cadastrar profissional');
+                throw new Error(data.message || data.error || 'Erro ao cadastrar profissional');
             }
             
             return data;
@@ -152,7 +138,8 @@ window.api = {
             return data;
         } catch (error) {
             console.error('Erro ao buscar categorias:', error);
-            throw error;
+            // Retornar array vazio em caso de erro para evitar quebra da interface
+            return [];
         }
     },
     
@@ -202,7 +189,8 @@ window.api = {
             return data;
         } catch (error) {
             console.error('Erro ao buscar profissionais:', error);
-            throw error;
+            // Retornar array vazio em caso de erro para evitar quebra da interface
+            return [];
         }
     },
     
@@ -292,7 +280,7 @@ window.api = {
             
             if (!response.ok) {
                 const data = await response.json();
-                throw new Error(data.error || 'Erro ao atualizar perfil');
+                throw new Error(data.message || data.error || 'Erro ao atualizar perfil');
             }
             
             const data = await response.json();
@@ -336,7 +324,7 @@ window.api = {
             
             if (!response.ok) {
                 const data = await response.json();
-                throw new Error(data.error || 'Erro ao atualizar perfil');
+                throw new Error(data.message || data.error || 'Erro ao atualizar perfil');
             }
             
             const data = await response.json();
@@ -366,7 +354,7 @@ window.api = {
             
             if (!response.ok) {
                 const data = await response.json();
-                throw new Error(data.error || 'Erro ao adicionar atividade');
+                throw new Error(data.message || data.error || 'Erro ao adicionar atividade');
             }
             
             const data = await response.json();
@@ -399,7 +387,8 @@ window.api = {
             return data;
         } catch (error) {
             console.error('Erro ao buscar profissionais pendentes:', error);
-            throw error;
+            // Retornar array vazio em caso de erro para evitar quebra da interface
+            return [];
         }
     },
     
@@ -420,7 +409,7 @@ window.api = {
             
             if (!response.ok) {
                 const data = await response.json();
-                throw new Error(data.error || 'Erro ao aprovar profissional');
+                throw new Error(data.message || data.error || 'Erro ao aprovar profissional');
             }
             
             const data = await response.json();
@@ -448,7 +437,7 @@ window.api = {
             
             if (!response.ok) {
                 const data = await response.json();
-                throw new Error(data.error || 'Erro ao rejeitar profissional');
+                throw new Error(data.message || data.error || 'Erro ao rejeitar profissional');
             }
             
             const data = await response.json();
