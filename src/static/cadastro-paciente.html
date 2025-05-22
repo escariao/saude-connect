@@ -58,7 +58,7 @@
                     <div id="register-success" class="alert alert-success d-none">
                         Cadastro realizado com sucesso! Redirecionando para o login...
                     </div>
-                    <form id="register-form">
+                    <form id="register-form" class="needs-validation" novalidate>
                         <div class="row">
                             <div class="col-md-6 mb-3">
                                 <label for="name" class="form-label">Nome Completo</label>
@@ -270,10 +270,15 @@
             const registerSpinner = document.getElementById('register-spinner');
             const registerButtonText = document.getElementById('register-button-text');
             
+            // Remover validação inicial para evitar mensagens de erro ao carregar a página
+            document.querySelectorAll('.form-control, .form-select, .form-check-input').forEach(element => {
+                element.classList.remove('is-invalid');
+            });
+            
             registerForm.addEventListener('submit', async function(e) {
                 e.preventDefault();
                 
-                // Validar formulário
+                // Validar formulário apenas no momento do envio
                 if (!validateForm()) {
                     return;
                 }
@@ -322,28 +327,18 @@
                 }
             });
             
-            // Validar campos ao perder o foco
-            const formFields = registerForm.querySelectorAll('input, select');
-            formFields.forEach(field => {
-                field.addEventListener('blur', function() {
-                    validateField(this);
-                });
-            });
-            
-            // Validar confirmação de senha quando mudar
-            document.getElementById('confirm-password').addEventListener('input', function() {
-                const password = document.getElementById('password').value;
-                if (this.value && this.value !== password) {
-                    this.classList.add('is-invalid');
-                } else {
-                    this.classList.remove('is-invalid');
-                }
-            });
+            // Remover eventos de validação no blur para evitar mensagens antecipadas
+            // A validação só ocorrerá no momento do envio do formulário
         });
         
         function validateForm() {
             let isValid = true;
             const form = document.getElementById('register-form');
+            
+            // Limpar todas as validações anteriores
+            form.querySelectorAll('.is-invalid').forEach(field => {
+                field.classList.remove('is-invalid');
+            });
             
             // Validar todos os campos obrigatórios
             const requiredFields = form.querySelectorAll('[required]');
@@ -359,6 +354,15 @@
             if (password !== confirmPassword) {
                 document.getElementById('confirm-password').classList.add('is-invalid');
                 isValid = false;
+            }
+            
+            // Se não for válido, rolar até o primeiro campo inválido
+            if (!isValid) {
+                const firstInvalid = form.querySelector('.is-invalid');
+                if (firstInvalid) {
+                    firstInvalid.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    firstInvalid.focus();
+                }
             }
             
             return isValid;

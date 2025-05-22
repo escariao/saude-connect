@@ -257,13 +257,14 @@ window.api = {
             const response = await fetch(`${API_BASE_URL}/api/search/activities`);
             
             if (!response.ok) {
-                throw new Error('Falha ao buscar atividades');
+                console.error('Erro ao buscar atividades:', response.status);
+                return []; // Retornar array vazio em caso de erro para evitar quebra da interface
             }
             
             return await response.json();
         } catch (error) {
             console.error('Erro ao buscar atividades:', error);
-            throw error;
+            return []; // Retornar array vazio em caso de exceção
         }
     },
     
@@ -272,13 +273,14 @@ window.api = {
             const response = await fetch(`${API_BASE_URL}/api/search/categories`);
             
             if (!response.ok) {
-                throw new Error('Falha ao buscar categorias');
+                console.error('Erro ao buscar categorias:', response.status);
+                return []; // Retornar array vazio em caso de erro para evitar quebra da interface
             }
             
             return await response.json();
         } catch (error) {
             console.error('Erro ao buscar categorias:', error);
-            throw error;
+            return []; // Retornar array vazio em caso de exceção
         }
     },
     
@@ -449,7 +451,7 @@ window.api = {
             if (!token) throw new Error('Autenticação necessária');
             
             const response = await fetch(`${API_BASE_URL}/api/admin/approve_professional/${professionalId}`, {
-                method: 'POST',
+                method: 'PUT',
                 headers: {
                     'Authorization': `Bearer ${token}`
                 }
@@ -473,7 +475,7 @@ window.api = {
             if (!token) throw new Error('Autenticação necessária');
             
             const response = await fetch(`${API_BASE_URL}/api/admin/reject_professional/${professionalId}`, {
-                method: 'POST',
+                method: 'PUT',
                 headers: {
                     'Authorization': `Bearer ${token}`
                 }
@@ -487,47 +489,6 @@ window.api = {
             return await response.json();
         } catch (error) {
             console.error('Erro ao rejeitar profissional:', error);
-            throw error;
-        }
-    },
-    
-    // Visualização de diploma
-    getDiploma: async function(professionalId) {
-        try {
-            const token = this.getToken();
-            const headers = token ? { 'Authorization': `Bearer ${token}` } : {};
-            
-            const response = await fetch(`${API_BASE_URL}/api/admin/diploma/${professionalId}`, {
-                headers: headers
-            });
-            
-            if (!response.ok) {
-                throw new Error('Falha ao buscar diploma');
-            }
-            
-            return await response.blob();
-        } catch (error) {
-            console.error('Erro ao buscar diploma:', error);
-            throw error;
-        }
-    },
-    
-    // Detalhes do profissional
-    getProfessionalDetails: async function(professionalId) {
-        try {
-            const response = await fetch(`${API_BASE_URL}/api/search/professional/${professionalId}`);
-            
-            if (!response.ok) {
-                if (response.status === 404) {
-                    throw new Error('Profissional não encontrado');
-                } else {
-                    throw new Error('Falha ao buscar detalhes do profissional');
-                }
-            }
-            
-            return await response.json();
-        } catch (error) {
-            console.error('Erro ao buscar detalhes do profissional:', error);
             throw error;
         }
     }

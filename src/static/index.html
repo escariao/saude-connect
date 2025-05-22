@@ -214,46 +214,53 @@
             document.getElementById('logout-link').addEventListener('click', function(e) {
                 e.preventDefault();
                 window.api.logout();
-                updateAuthUI();
-                window.location.reload();
+                window.location.href = 'index.html';
             });
         });
         
         function updateAuthUI() {
-            const isAuthenticated = window.api.isAuthenticated();
-            const userType = window.api.getUserType();
-            const userData = window.api.getUserData();
-            
-            // Atualizar itens de navegação
-            document.getElementById('login-nav-item').classList.toggle('d-none', isAuthenticated);
-            document.getElementById('cadastro-dropdown').classList.toggle('d-none', isAuthenticated);
-            document.getElementById('user-dropdown').classList.toggle('d-none', !isAuthenticated);
-            
-            // Configurar menu do usuário autenticado
-            if (isAuthenticated && userData) {
-                // Mostrar nome do usuário
-                document.getElementById('user-name').textContent = userData.name || 'Minha Conta';
+            try {
+                const isAuthenticated = window.api.isAuthenticated();
+                const userType = window.api.getUserType();
+                const userData = window.api.getUserData();
                 
-                // Configurar link de perfil
-                const profileLink = document.getElementById('profile-link');
-                const adminLink = document.getElementById('admin-link');
+                // Atualizar itens de navegação
+                document.getElementById('login-nav-item').classList.toggle('d-none', isAuthenticated);
+                document.getElementById('cadastro-dropdown').classList.toggle('d-none', isAuthenticated);
+                document.getElementById('user-dropdown').classList.toggle('d-none', !isAuthenticated);
                 
-                if (userType === 'admin') {
-                    profileLink.href = 'admin.html';
-                    profileLink.textContent = 'Painel Admin';
-                    adminLink.classList.add('d-none'); // Ocultar link duplicado
-                } else if (userType === 'professional') {
-                    profileLink.href = 'perfil-profissional.html';
-                    profileLink.textContent = 'Meu Perfil';
-                    adminLink.classList.add('d-none');
-                } else if (userType === 'patient') {
-                    profileLink.href = 'perfil-paciente.html';
-                    profileLink.textContent = 'Meu Perfil';
-                    adminLink.classList.add('d-none');
+                // Configurar menu do usuário autenticado
+                if (isAuthenticated && userData) {
+                    // Mostrar nome do usuário
+                    document.getElementById('user-name').textContent = userData.name || 'Minha Conta';
+                    
+                    // Configurar link de perfil
+                    const profileLink = document.getElementById('profile-link');
+                    const adminLink = document.getElementById('admin-link');
+                    
+                    if (userType === 'admin') {
+                        profileLink.href = 'admin.html';
+                        profileLink.textContent = 'Painel Admin';
+                        adminLink.classList.add('d-none'); // Ocultar link duplicado
+                    } else if (userType === 'professional') {
+                        profileLink.href = 'perfil-profissional.html';
+                        profileLink.textContent = 'Meu Perfil';
+                        adminLink.classList.add('d-none');
+                    } else if (userType === 'patient') {
+                        profileLink.href = 'perfil-paciente.html';
+                        profileLink.textContent = 'Meu Perfil';
+                        adminLink.classList.add('d-none');
+                    }
+                    
+                    // Mostrar link de admin apenas para administradores
+                    adminLink.classList.toggle('d-none', userType !== 'admin');
                 }
-                
-                // Mostrar link de admin apenas para administradores
-                adminLink.classList.toggle('d-none', userType !== 'admin');
+            } catch (error) {
+                console.error("Erro ao atualizar UI de autenticação:", error);
+                // Em caso de erro, garantir que a interface de visitante seja mostrada
+                document.getElementById('login-nav-item').classList.remove('d-none');
+                document.getElementById('cadastro-dropdown').classList.remove('d-none');
+                document.getElementById('user-dropdown').classList.add('d-none');
             }
         }
         
@@ -308,41 +315,17 @@
                                 </div>
                                 <h5 class="card-title">${category.name}</h5>
                                 <p class="card-text">${category.description || `Profissionais da área de ${category.name}`}</p>
-                                <a href="busca.html?category=${category.id}" class="stretched-link"></a>
+                                <a href="busca.html?category=${encodeURIComponent(category.name)}" class="stretched-link"></a>
                             </div>
                         </div>
                     `;
                     
                     categoriesContainer.appendChild(categoryCard);
                 });
-                
-                // Adicionar card "Ver todas as categorias" se houver mais de 8
-                if (categories.length > 8) {
-                    const viewAllCard = document.createElement('div');
-                    viewAllCard.innerHTML = `
-                        <div class="category-card">
-                            <div class="card-body text-center">
-                                <div class="category-icon">
-                                    <i class="bi bi-grid-3x3-gap"></i>
-                                </div>
-                                <h5 class="card-title">Ver todas</h5>
-                                <p class="card-text">Explore todas as categorias disponíveis</p>
-                                <a href="busca.html" class="stretched-link"></a>
-                            </div>
-                        </div>
-                    `;
-                    
-                    categoriesContainer.appendChild(viewAllCard);
-                }
-                
             } catch (error) {
-                console.error('Erro ao carregar categorias:', error);
+                console.error("Erro ao carregar categorias:", error);
                 const categoriesContainer = document.getElementById('categories-container');
-                categoriesContainer.innerHTML = `
-                    <div class="alert alert-danger">
-                        Erro ao carregar categorias: ${error.message || 'Tente novamente mais tarde.'}
-                    </div>
-                `;
+                categoriesContainer.innerHTML = '<p class="text-center">Erro ao carregar categorias. Tente novamente mais tarde.</p>';
             }
         }
     </script>
