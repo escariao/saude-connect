@@ -15,8 +15,14 @@ window.api = {
             });
             
             if (!response.ok) {
-                const errorData = await response.json();
-                throw new Error(errorData.message || 'Falha na autenticação');
+                if (response.status === 401) {
+                    throw new Error('Email ou senha incorretos');
+                } else if (response.status === 400) {
+                    const errorData = await response.json();
+                    throw new Error(errorData.message || 'Dados de login inválidos');
+                } else {
+                    throw new Error('Erro no servidor. Tente novamente mais tarde.');
+                }
             }
             
             const data = await response.json();
@@ -98,6 +104,95 @@ window.api = {
         return localStorage.getItem('token');
     },
     
+    // Perfil do usuário
+    getUserProfile: async function() {
+        try {
+            const token = this.getToken();
+            if (!token) throw new Error('Autenticação necessária');
+            
+            const userData = this.getUserData();
+            if (!userData) throw new Error('Dados do usuário não encontrados');
+            
+            const userId = userData.id;
+            const userType = userData.user_type;
+            
+            let endpoint = '';
+            if (userType === 'patient') {
+                endpoint = `/api/patient/${userId}`;
+            } else if (userType === 'professional') {
+                endpoint = `/api/professional/${userId}`;
+            } else if (userType === 'admin') {
+                return userData; // Admin não tem perfil adicional
+            } else {
+                throw new Error('Tipo de usuário desconhecido');
+            }
+            
+            const response = await fetch(`${API_BASE_URL}${endpoint}`, {
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
+            });
+            
+            if (!response.ok) {
+                if (response.status === 404) {
+                    throw new Error('Perfil não encontrado');
+                } else {
+                    throw new Error('Erro ao carregar perfil');
+                }
+            }
+            
+            const profileData = await response.json();
+            return {
+                ...userData,
+                ...profileData
+            };
+        } catch (error) {
+            console.error('Erro ao buscar perfil do usuário:', error);
+            throw error;
+        }
+    },
+    
+    updateUserProfile: async function(profileData) {
+        try {
+            const token = this.getToken();
+            if (!token) throw new Error('Autenticação necessária');
+            
+            const userData = this.getUserData();
+            if (!userData) throw new Error('Dados do usuário não encontrados');
+            
+            const userId = userData.id;
+            const userType = userData.user_type;
+            
+            let endpoint = '';
+            if (userType === 'patient') {
+                endpoint = `/api/patient/${userId}`;
+            } else if (userType === 'professional') {
+                endpoint = `/api/professional/${userId}`;
+            } else {
+                throw new Error('Atualização de perfil não disponível para este tipo de usuário');
+            }
+            
+            const response = await fetch(`${API_BASE_URL}${endpoint}`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
+                body: JSON.stringify(profileData)
+            });
+            
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.message || 'Falha ao atualizar perfil');
+            }
+            
+            return await response.json();
+        } catch (error) {
+            console.error('Erro ao atualizar perfil:', error);
+            throw error;
+        }
+    },
+    
     // Cadastros
     registerPatient: async function(patientData) {
         try {
@@ -110,8 +205,16 @@ window.api = {
             });
             
             if (!response.ok) {
-                const errorData = await response.json();
-                throw new Error(errorData.message || 'Falha no cadastro');
+                if (response.status === 400) {
+                    const errorData = await response.json();
+                    if (errorData.error && errorData.error.includes('Email já cadastrado')) {
+                        throw new Error('Este email já está em uso. Por favor, utilize outro email ou faça login.');
+                    } else {
+                        throw new Error(errorData.error || 'Dados de cadastro inválidos');
+                    }
+                } else {
+                    throw new Error('Erro no servidor. Tente novamente mais tarde.');
+                }
             }
             
             return await response.json();
@@ -123,14 +226,22 @@ window.api = {
     
     registerProfessional: async function(formData) {
         try {
-            const response = await fetch(`${API_BASE_URL}/api/user/register_professional`, {
+            const response = await fetch(`${API_BASE_URL}/api/auth/register/professional`, {
                 method: 'POST',
                 body: formData // FormData já está configurado para multipart/form-data
             });
             
             if (!response.ok) {
-                const errorData = await response.json();
-                throw new Error(errorData.message || 'Falha no cadastro');
+                if (response.status === 400) {
+                    const errorData = await response.json();
+                    if (errorData.error && errorData.error.includes('Email já cadastrado')) {
+                        throw new Error('Este email já está em uso. Por favor, utilize outro email ou faça login.');
+                    } else {
+                        throw new Error(errorData.error || 'Dados de cadastro inválidos');
+                    }
+                } else {
+                    throw new Error('Erro no servidor. Tente novamente mais tarde.');
+                }
             }
             
             return await response.json();
@@ -158,7 +269,7 @@ window.api = {
     
     getCategories: async function() {
         try {
-            const response = await fetch(`${API_BASE_URL}/api/admin/categories`);
+            const response = await fetch(`${API_BASE_URL}/api/search/categories`);
             
             if (!response.ok) {
                 throw new Error('Falha ao buscar categorias');
@@ -280,7 +391,7 @@ window.api = {
             
             // Adicionar parâmetros de busca se fornecidos
             const params = new URLSearchParams();
-            if (filters.activity) params.append('activity', filters.activity);
+            if (filters.activity) params.append('activity_id', filters.activity);
             if (filters.category) params.append('category', filters.category);
             if (filters.name) params.append('name', filters.name);
             
@@ -291,7 +402,11 @@ window.api = {
             const response = await fetch(url);
             
             if (!response.ok) {
-                throw new Error('Falha ao buscar profissionais');
+                if (response.status === 404) {
+                    return []; // Retornar array vazio se não encontrar profissionais
+                } else {
+                    throw new Error('Falha ao buscar profissionais');
+                }
             }
             
             return await response.json();
@@ -314,7 +429,11 @@ window.api = {
             });
             
             if (!response.ok) {
-                throw new Error('Falha ao buscar profissionais pendentes');
+                if (response.status === 404) {
+                    return []; // Retornar array vazio se não encontrar profissionais pendentes
+                } else {
+                    throw new Error('Falha ao buscar profissionais pendentes');
+                }
             }
             
             return await response.json();
@@ -399,7 +518,11 @@ window.api = {
             const response = await fetch(`${API_BASE_URL}/api/search/professional/${professionalId}`);
             
             if (!response.ok) {
-                throw new Error('Falha ao buscar detalhes do profissional');
+                if (response.status === 404) {
+                    throw new Error('Profissional não encontrado');
+                } else {
+                    throw new Error('Falha ao buscar detalhes do profissional');
+                }
             }
             
             return await response.json();

@@ -80,18 +80,47 @@
                                 </div>
                                 
                                 <div class="mb-3">
-                                    <label class="form-label">Especialidades/Atividades</label>
-                                    <div id="activities-container">
-                                        <div class="alert alert-info">Carregando especialidades...</div>
+                                    <label class="form-label">Categoria Profissional</label>
+                                    <select class="form-control" id="category-select" required>
+                                        <option value="">Selecione sua categoria profissional</option>
+                                        <!-- Categorias serão carregadas dinamicamente -->
+                                    </select>
+                                    <div class="invalid-feedback" id="category-error">
+                                        Por favor, selecione sua categoria profissional.
                                     </div>
                                 </div>
                                 
-                                <div id="selected-activities" class="mb-3">
-                                    <!-- Atividades selecionadas serão adicionadas aqui -->
-                                </div>
-                                
-                                <div id="activity-details" class="mb-3">
-                                    <!-- Detalhes das atividades selecionadas serão adicionados aqui -->
+                                <div class="mb-3">
+                                    <label class="form-label">Atividades/Serviços Oferecidos</label>
+                                    <div id="activities-container">
+                                        <div class="activity-input-group mb-3">
+                                            <input type="text" class="form-control activity-name" placeholder="Nome da atividade ou serviço" required>
+                                            <div class="invalid-feedback">
+                                                Por favor, informe o nome da atividade.
+                                            </div>
+                                            <textarea class="form-control mt-2 activity-description" placeholder="Descrição detalhada do serviço" rows="2" required></textarea>
+                                            <div class="invalid-feedback">
+                                                Por favor, descreva esta atividade.
+                                            </div>
+                                            <div class="row mt-2">
+                                                <div class="col-md-6">
+                                                    <input type="number" class="form-control activity-experience" placeholder="Anos de experiência" min="0" required>
+                                                    <div class="invalid-feedback">
+                                                        Informe os anos de experiência.
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-6">
+                                                    <input type="number" class="form-control activity-price" placeholder="Preço (R$)" min="0" step="0.01" required>
+                                                    <div class="invalid-feedback">
+                                                        Informe o preço do serviço.
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <button type="button" class="btn btn-outline-primary btn-sm mt-2" id="add-activity-btn">
+                                        <i class="bi bi-plus-circle"></i> Adicionar outra atividade
+                                    </button>
                                 </div>
                                 
                                 <button type="submit" class="btn btn-primary w-100">Cadastrar</button>
@@ -178,122 +207,12 @@
                 window.api.logout(); // Garantir limpeza em caso de erro
             }
             
-            const selectedActivities = new Set();
+            // Carregar categorias
+            loadCategories();
             
-            // Carregar atividades disponíveis
-            async function loadActivities() {
-                try {
-                    const activities = await window.api.getActivities();
-                    const activitiesContainer = document.getElementById('activities-container');
-                    
-                    if (activities.length === 0) {
-                        activitiesContainer.innerHTML = '<div class="alert alert-warning">Nenhuma especialidade disponível no momento.</div>';
-                        return;
-                    }
-                    
-                    let html = '<div class="row">';
-                    activities.forEach(activity => {
-                        html += `
-                            <div class="col-md-6 mb-2">
-                                <div class="form-check">
-                                    <input class="form-check-input activity-checkbox" type="checkbox" value="${activity.id}" id="activity-${activity.id}">
-                                    <label class="form-check-label" for="activity-${activity.id}">
-                                        ${activity.name}
-                                    </label>
-                                </div>
-                            </div>
-                        `;
-                    });
-                    html += '</div>';
-                    
-                    activitiesContainer.innerHTML = html;
-                    
-                    // Adicionar event listeners para os checkboxes
-                    document.querySelectorAll('.activity-checkbox').forEach(checkbox => {
-                        checkbox.addEventListener('change', function() {
-                            const activityId = this.value;
-                            const activityName = this.nextElementSibling.textContent.trim();
-                            
-                            if (this.checked) {
-                                selectedActivities.add(activityId);
-                                addActivityDetails(activityId, activityName);
-                            } else {
-                                selectedActivities.delete(activityId);
-                                removeActivityDetails(activityId);
-                            }
-                            
-                            updateSelectedActivities();
-                        });
-                    });
-                    
-                } catch (error) {
-                    document.getElementById('activities-container').innerHTML = `
-                        <div class="alert alert-danger">
-                            Erro ao carregar especialidades: ${error.message || 'Tente novamente mais tarde.'}
-                        </div>
-                    `;
-                }
-            }
+            // Configurar botão para adicionar mais atividades
+            document.getElementById('add-activity-btn').addEventListener('click', addActivityField);
             
-            function addActivityDetails(activityId, activityName) {
-                const activityDetails = document.getElementById('activity-details');
-                
-                const detailsHtml = `
-                    <div class="card mb-3 activity-detail" id="detail-${activityId}">
-                        <div class="card-header">
-                            <strong>${activityName}</strong>
-                        </div>
-                        <div class="card-body">
-                            <div class="mb-3">
-                                <label class="form-label">Descrição do serviço</label>
-                                <textarea class="form-control" id="description-${activityId}" rows="2" placeholder="Descreva este serviço"></textarea>
-                            </div>
-                            <div class="row">
-                                <div class="col-md-6 mb-3">
-                                    <label class="form-label">Anos de experiência</label>
-                                    <input type="number" class="form-control" id="experience-${activityId}" min="0" placeholder="Ex: 5">
-                                </div>
-                                <div class="col-md-6 mb-3">
-                                    <label class="form-label">Preço (R$)</label>
-                                    <input type="number" class="form-control" id="price-${activityId}" min="0" step="0.01" placeholder="Ex: 150.00">
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                `;
-                
-                activityDetails.innerHTML += detailsHtml;
-            }
-            
-            function removeActivityDetails(activityId) {
-                const detailElement = document.getElementById(`detail-${activityId}`);
-                if (detailElement) {
-                    detailElement.remove();
-                }
-            }
-            
-            function updateSelectedActivities() {
-                const selectedActivitiesContainer = document.getElementById('selected-activities');
-                
-                if (selectedActivities.size === 0) {
-                    selectedActivitiesContainer.innerHTML = '';
-                    return;
-                }
-                
-                let html = '<label class="form-label">Especialidades selecionadas:</label><div>';
-                
-                document.querySelectorAll('.activity-checkbox:checked').forEach(checkbox => {
-                    const activityName = checkbox.nextElementSibling.textContent.trim();
-                    html += `<span class="activity-badge">${activityName}</span>`;
-                });
-                
-                html += '</div>';
-                selectedActivitiesContainer.innerHTML = html;
-            }
-            
-            // Carregar atividades ao iniciar
-            loadActivities();
-
             // Configurar modal de sucesso
             document.getElementById('goToLogin').addEventListener('click', function() {
                 window.location.href = 'login.html';
@@ -303,8 +222,244 @@
             document.getElementById('professional-form').addEventListener('submit', async function(e) {
                 e.preventDefault();
                 
-                const name = document.getElementById('name').value;
-                const email = document.getElementById('email').value;
+                // Validar todos os campos
+                if (!validateForm()) {
+                    return;
+                }
+                
+                const alertContainer = document.getElementById('alert-container');
+                alertContainer.innerHTML = '<div class="alert alert-info">Enviando dados de cadastro...</div>';
+                
+                try {
+                    // Coletar dados do formulário
+                    const formData = new FormData();
+                    formData.append('name', document.getElementById('name').value);
+                    formData.append('email', document.getElementById('email').value);
+                    formData.append('password', document.getElementById('password').value);
+                    formData.append('phone', document.getElementById('phone').value);
+                    formData.append('document_number', document.getElementById('document_number').value);
+                    formData.append('bio', document.getElementById('bio').value);
+                    formData.append('category_id', document.getElementById('category-select').value);
+                    
+                    // Adicionar diploma
+                    const diplomaFile = document.getElementById('diploma').files[0];
+                    if (diplomaFile) {
+                        formData.append('diploma', diplomaFile);
+                    }
+                    
+                    // Coletar atividades
+                    const activities = [];
+                    document.querySelectorAll('.activity-input-group').forEach(group => {
+                        const name = group.querySelector('.activity-name').value;
+                        const description = group.querySelector('.activity-description').value;
+                        const experience = group.querySelector('.activity-experience').value;
+                        const price = group.querySelector('.activity-price').value;
+                        
+                        if (name && description) {
+                            activities.push({
+                                name,
+                                description,
+                                experience_years: experience,
+                                price
+                            });
+                        }
+                    });
+                    
+                    formData.append('activities', JSON.stringify(activities));
+                    
+                    // Enviar dados para o servidor
+                    const response = await window.api.registerProfessional(formData);
+                    
+                    // Mostrar modal de sucesso
+                    const successModal = new bootstrap.Modal(document.getElementById('successModal'));
+                    successModal.show();
+                    
+                    // Limpar formulário
+                    document.getElementById('professional-form').reset();
+                    
+                } catch (error) {
+                    console.error('Erro no cadastro:', error);
+                    
+                    let errorMessage = 'Ocorreu um erro durante o cadastro. Por favor, tente novamente.';
+                    
+                    if (error.message) {
+                        if (error.message.includes('Email já está em uso')) {
+                            errorMessage = 'Este email já está cadastrado. Por favor, utilize outro email ou faça login.';
+                        } else {
+                            errorMessage = error.message;
+                        }
+                    }
+                    
+                    alertContainer.innerHTML = `<div class="alert alert-danger">${errorMessage}</div>`;
+                }
+            });
+            
+            // Validação de senha
+            document.getElementById('confirm-password').addEventListener('input', function() {
+                const password = document.getElementById('password').value;
+                const confirmPassword = this.value;
+                
+                if (password !== confirmPassword) {
+                    this.setCustomValidity('As senhas não coincidem');
+                    this.nextElementSibling.textContent = 'As senhas não coincidem';
+                } else {
+                    this.setCustomValidity('');
+                }
+            });
+        });
+        
+        // Carregar categorias profissionais
+        async function loadCategories() {
+            try {
+                const categories = await window.api.getCategories();
+                const categorySelect = document.getElementById('category-select');
+                
+                categories.forEach(category => {
+                    const option = document.createElement('option');
+                    option.value = category.id;
+                    option.textContent = category.name;
+                    categorySelect.appendChild(option);
+                });
+            } catch (error) {
+                console.error('Erro ao carregar categorias:', error);
+                document.getElementById('category-select').insertAdjacentHTML('afterend', 
+                    `<div class="alert alert-danger mt-2">
+                        Erro ao carregar categorias: ${error.message || 'Tente novamente mais tarde.'}
+                    </div>`
+                );
+            }
+        }
+        
+        // Adicionar campo para nova atividade
+        function addActivityField() {
+            const container = document.getElementById('activities-container');
+            const newActivity = document.createElement('div');
+            newActivity.className = 'activity-input-group mb-3 mt-4 border-top pt-3';
+            
+            newActivity.innerHTML = `
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <label class="form-label mb-0">Nova Atividade/Serviço</label>
+                    <button type="button" class="btn btn-outline-danger btn-sm remove-activity">
+                        <i class="bi bi-trash"></i> Remover
+                    </button>
+                </div>
+                <input type="text" class="form-control activity-name" placeholder="Nome da atividade ou serviço" required>
+                <div class="invalid-feedback">
+                    Por favor, informe o nome da atividade.
+                </div>
+                <textarea class="form-control mt-2 activity-description" placeholder="Descrição detalhada do serviço" rows="2" required></textarea>
+                <div class="invalid-feedback">
+                    Por favor, descreva esta atividade.
+                </div>
+                <div class="row mt-2">
+                    <div class="col-md-6">
+                        <input type="number" class="form-control activity-experience" placeholder="Anos de experiência" min="0" required>
+                        <div class="invalid-feedback">
+                            Informe os anos de experiência.
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <input type="number" class="form-control activity-price" placeholder="Preço (R$)" min="0" step="0.01" required>
+                        <div class="invalid-feedback">
+                            Informe o preço do serviço.
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            container.appendChild(newActivity);
+            
+            // Adicionar evento para remover atividade
+            newActivity.querySelector('.remove-activity').addEventListener('click', function() {
+                newActivity.remove();
+            });
+        }
+        
+        // Validar formulário
+        function validateForm() {
+            const form = document.getElementById('professional-form');
+            let isValid = true;
+            
+            // Limpar mensagens de erro anteriores
+            form.querySelectorAll('.is-invalid').forEach(el => {
+                el.classList.remove('is-invalid');
+            });
+            
+            // Validar campos obrigatórios
+            form.querySelectorAll('[required]').forEach(field => {
+                if (!field.value.trim()) {
+                    field.classList.add('is-invalid');
+                    isValid = false;
+                }
+            });
+            
+            // Validar email
+            const email = document.getElementById('email');
+            if (email.value && !isValidEmail(email.value)) {
+                email.classList.add('is-invalid');
+                email.nextElementSibling.textContent = 'Por favor, informe um email válido.';
+                isValid = false;
+            }
+            
+            // Validar senha
+            const password = document.getElementById('password');
+            const confirmPassword = document.getElementById('confirm-password');
+            
+            if (password.value && password.value.length < 6) {
+                password.classList.add('is-invalid');
+                password.nextElementSibling.textContent = 'A senha deve ter pelo menos 6 caracteres.';
+                isValid = false;
+            }
+            
+            if (password.value !== confirmPassword.value) {
+                confirmPassword.classList.add('is-invalid');
+                confirmPassword.nextElementSibling.textContent = 'As senhas não coincidem.';
+                isValid = false;
+            }
+            
+            // Validar categoria
+            const category = document.getElementById('category-select');
+            if (!category.value) {
+                category.classList.add('is-invalid');
+                document.getElementById('category-error').style.display = 'block';
+                isValid = false;
+            }
+            
+            // Validar pelo menos uma atividade
+            const activities = document.querySelectorAll('.activity-input-group');
+            let hasValidActivity = false;
+            
+            activities.forEach(group => {
+                const name = group.querySelector('.activity-name');
+                const description = group.querySelector('.activity-description');
+                
+                if (name.value.trim() && description.value.trim()) {
+                    hasValidActivity = true;
+                } else {
+                    if (!name.value.trim()) {
+                        name.classList.add('is-invalid');
+                    }
+                    if (!description.value.trim()) {
+                        description.classList.add('is-invalid');
+                    }
+                }
+            });
+            
+            if (!hasValidActivity) {
+                document.getElementById('alert-container').innerHTML = 
+                    '<div class="alert alert-danger">Por favor, cadastre pelo menos uma atividade/serviço.</div>';
+                isValid = false;
+            }
+            
+            return isValid;
+        }
+        
+        // Validar email
+        function isValidEmail(email) {
+            const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            return re.test(email);
+        }
+    </script>document.getElementById('email').value;
                 const password = document.getElementById('password').value;
                 const confirmPassword = document.getElementById('confirm-password').value;
                 const phone = document.getElementById('phone').value;
