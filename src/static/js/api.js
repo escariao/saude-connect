@@ -1,12 +1,54 @@
 // API client para o Saúde Connect
-
-const API_BASE_URL = '';
-
 window.api = {
-    // Autenticação
+    // URL base da API
+    baseUrl: '/api',
+    
+    // Método para verificar se o usuário está autenticado
+    isAuthenticated: function() {
+        try {
+            const token = localStorage.getItem('token');
+            const userData = localStorage.getItem('userData');
+            return !!(token && userData && JSON.parse(userData));
+        } catch (error) {
+            console.error('Erro ao verificar autenticação:', error);
+            // Em caso de erro, considerar que não está autenticado
+            localStorage.removeItem('token');
+            localStorage.removeItem('userData');
+            return false;
+        }
+    },
+    
+    // Método para obter o tipo de usuário
+    getUserType: function() {
+        try {
+            const userData = localStorage.getItem('userData');
+            if (!userData) return null;
+            
+            const user = JSON.parse(userData);
+            return user.user_type;
+        } catch (error) {
+            console.error('Erro ao obter tipo de usuário:', error);
+            return null;
+        }
+    },
+    
+    // Método para obter os dados do usuário
+    getUserData: function() {
+        try {
+            const userData = localStorage.getItem('userData');
+            if (!userData) return null;
+            
+            return JSON.parse(userData);
+        } catch (error) {
+            console.error('Erro ao obter dados do usuário:', error);
+            return null;
+        }
+    },
+    
+    // Método para fazer login
     login: async function(email, password) {
         try {
-            const response = await fetch(`${API_BASE_URL}/api/auth/login`, {
+            const response = await fetch(`${this.baseUrl}/auth/login`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
@@ -14,18 +56,13 @@ window.api = {
                 body: JSON.stringify({ email, password })
             });
             
+            const data = await response.json();
+            
             if (!response.ok) {
-                if (response.status === 401) {
-                    throw new Error('Email ou senha incorretos');
-                } else if (response.status === 400) {
-                    const errorData = await response.json();
-                    throw new Error(errorData.message || 'Dados de login inválidos');
-                } else {
-                    throw new Error('Erro no servidor. Tente novamente mais tarde.');
-                }
+                throw new Error(data.error || 'Erro ao fazer login');
             }
             
-            const data = await response.json();
+            // Armazenar token e dados do usuário
             localStorage.setItem('token', data.token);
             localStorage.setItem('userData', JSON.stringify(data.user));
             
@@ -36,143 +73,215 @@ window.api = {
         }
     },
     
+    // Método para fazer logout
     logout: function() {
         localStorage.removeItem('token');
         localStorage.removeItem('userData');
-        // Garantir que todos os dados de autenticação sejam removidos
-        localStorage.removeItem('authState');
     },
     
-    isAuthenticated: function() {
+    // Método para cadastrar paciente
+    registerPatient: async function(patientData) {
+        try {
+            const response = await fetch(`${this.baseUrl}/patient/register`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(patientData)
+            });
+            
+            const data = await response.json();
+            
+            if (!response.ok) {
+                throw new Error(data.error || 'Erro ao cadastrar paciente');
+            }
+            
+            return data;
+        } catch (error) {
+            console.error('Erro no cadastro de paciente:', error);
+            throw error;
+        }
+    },
+    
+    // Método para cadastrar profissional
+    registerProfessional: async function(professionalData) {
+        try {
+            // Criar FormData para envio de arquivos
+            const formData = new FormData();
+            
+            // Adicionar dados do profissional
+            Object.keys(professionalData).forEach(key => {
+                if (key !== 'diploma') {
+                    formData.append(key, professionalData[key]);
+                }
+            });
+            
+            // Adicionar diploma se existir
+            if (professionalData.diploma) {
+                formData.append('diploma', professionalData.diploma);
+            }
+            
+            const response = await fetch(`${this.baseUrl}/professional/register`, {
+                method: 'POST',
+                body: formData
+            });
+            
+            const data = await response.json();
+            
+            if (!response.ok) {
+                throw new Error(data.error || 'Erro ao cadastrar profissional');
+            }
+            
+            return data;
+        } catch (error) {
+            console.error('Erro no cadastro de profissional:', error);
+            throw error;
+        }
+    },
+    
+    // Método para buscar categorias
+    getCategories: async function() {
+        try {
+            const response = await fetch(`${this.baseUrl}/search/categories`);
+            
+            if (!response.ok) {
+                throw new Error('Erro ao buscar categorias');
+            }
+            
+            const data = await response.json();
+            return data;
+        } catch (error) {
+            console.error('Erro ao buscar categorias:', error);
+            throw error;
+        }
+    },
+    
+    // Método para buscar atividades
+    getActivities: async function(categoryId = null) {
+        try {
+            let url = `${this.baseUrl}/search/activities`;
+            if (categoryId) {
+                url += `?category_id=${categoryId}`;
+            }
+            
+            const response = await fetch(url);
+            
+            if (!response.ok) {
+                throw new Error('Erro ao buscar atividades');
+            }
+            
+            const data = await response.json();
+            return data;
+        } catch (error) {
+            console.error('Erro ao buscar atividades:', error);
+            // Retornar array vazio em caso de erro para evitar quebra da interface
+            return [];
+        }
+    },
+    
+    // Método para buscar profissionais
+    searchProfessionals: async function(params = {}) {
+        try {
+            // Construir query string
+            const queryParams = new URLSearchParams();
+            Object.keys(params).forEach(key => {
+                if (params[key]) {
+                    queryParams.append(key, params[key]);
+                }
+            });
+            
+            const url = `${this.baseUrl}/search/professionals?${queryParams.toString()}`;
+            
+            const response = await fetch(url);
+            
+            if (!response.ok) {
+                throw new Error('Erro ao buscar profissionais');
+            }
+            
+            const data = await response.json();
+            return data;
+        } catch (error) {
+            console.error('Erro ao buscar profissionais:', error);
+            throw error;
+        }
+    },
+    
+    // Método para obter dados do perfil do paciente
+    getPatientProfile: async function() {
         try {
             const token = localStorage.getItem('token');
-            const userData = localStorage.getItem('userData');
-            
-            // Verificação mais rigorosa para evitar falsos positivos
-            if (!token || !userData) {
-                this.logout(); // Garantir limpeza completa
-                return false;
+            if (!token) {
+                throw new Error('Usuário não autenticado');
             }
-            
-            // Tentar analisar os dados do usuário para garantir que são válidos
-            try {
-                const user = JSON.parse(userData);
-                if (!user || !user.id || !user.email || !user.user_type) {
-                    this.logout(); // Limpar dados inválidos
-                    return false;
-                }
-                
-                // Verificar se o token não está vazio ou malformado
-                if (token.length < 10) {
-                    this.logout();
-                    return false;
-                }
-                
-                return true;
-            } catch (e) {
-                this.logout(); // Limpar dados corrompidos
-                return false;
-            }
-        } catch (e) {
-            // Em caso de erro (como acesso bloqueado ao localStorage), retornar false
-            console.error('Erro ao verificar autenticação:', e);
-            this.logout(); // Garantir limpeza
-            return false;
-        }
-    },
-    
-    getUserData: function() {
-        try {
-            const userData = localStorage.getItem('userData');
-            return userData ? JSON.parse(userData) : null;
-        } catch (e) {
-            this.logout(); // Limpar dados corrompidos
-            return null;
-        }
-    },
-    
-    getUserType: function() {
-        try {
-            const userData = this.getUserData();
-            return userData ? userData.user_type : null;
-        } catch (e) {
-            return null;
-        }
-    },
-    
-    getToken: function() {
-        return localStorage.getItem('token');
-    },
-    
-    // Perfil do usuário
-    getUserProfile: async function() {
-        try {
-            const token = this.getToken();
-            if (!token) throw new Error('Autenticação necessária');
             
             const userData = this.getUserData();
-            if (!userData) throw new Error('Dados do usuário não encontrados');
-            
-            const userId = userData.id;
-            const userType = userData.user_type;
-            
-            let endpoint = '';
-            if (userType === 'patient') {
-                endpoint = `/api/patient/${userId}`;
-            } else if (userType === 'professional') {
-                endpoint = `/api/professional/${userId}`;
-            } else if (userType === 'admin') {
-                return userData; // Admin não tem perfil adicional
-            } else {
-                throw new Error('Tipo de usuário desconhecido');
+            if (!userData || !userData.id) {
+                throw new Error('Dados do usuário não encontrados');
             }
             
-            const response = await fetch(`${API_BASE_URL}${endpoint}`, {
+            const response = await fetch(`${this.baseUrl}/patient/${userData.id}`, {
                 headers: {
                     'Authorization': `Bearer ${token}`
                 }
             });
             
             if (!response.ok) {
-                if (response.status === 404) {
-                    throw new Error('Perfil não encontrado');
-                } else {
-                    throw new Error('Erro ao carregar perfil');
-                }
+                throw new Error('Erro ao buscar perfil do paciente');
             }
             
-            const profileData = await response.json();
-            return {
-                ...userData,
-                ...profileData
-            };
+            const data = await response.json();
+            return data;
         } catch (error) {
-            console.error('Erro ao buscar perfil do usuário:', error);
+            console.error('Erro ao buscar perfil do paciente:', error);
             throw error;
         }
     },
     
-    updateUserProfile: async function(profileData) {
+    // Método para obter dados do perfil do profissional
+    getProfessionalProfile: async function() {
         try {
-            const token = this.getToken();
-            if (!token) throw new Error('Autenticação necessária');
-            
-            const userData = this.getUserData();
-            if (!userData) throw new Error('Dados do usuário não encontrados');
-            
-            const userId = userData.id;
-            const userType = userData.user_type;
-            
-            let endpoint = '';
-            if (userType === 'patient') {
-                endpoint = `/api/patient/${userId}`;
-            } else if (userType === 'professional') {
-                endpoint = `/api/professional/${userId}`;
-            } else {
-                throw new Error('Atualização de perfil não disponível para este tipo de usuário');
+            const token = localStorage.getItem('token');
+            if (!token) {
+                throw new Error('Usuário não autenticado');
             }
             
-            const response = await fetch(`${API_BASE_URL}${endpoint}`, {
+            const userData = this.getUserData();
+            if (!userData || !userData.id) {
+                throw new Error('Dados do usuário não encontrados');
+            }
+            
+            const response = await fetch(`${this.baseUrl}/professional/${userData.id}`, {
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
+            });
+            
+            if (!response.ok) {
+                throw new Error('Erro ao buscar perfil do profissional');
+            }
+            
+            const data = await response.json();
+            return data;
+        } catch (error) {
+            console.error('Erro ao buscar perfil do profissional:', error);
+            throw error;
+        }
+    },
+    
+    // Método para atualizar perfil do paciente
+    updatePatientProfile: async function(profileData) {
+        try {
+            const token = localStorage.getItem('token');
+            if (!token) {
+                throw new Error('Usuário não autenticado');
+            }
+            
+            const userData = this.getUserData();
+            if (!userData || !userData.id) {
+                throw new Error('Dados do usuário não encontrados');
+            }
+            
+            const response = await fetch(`${this.baseUrl}/patient/${userData.id}`, {
                 method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json',
@@ -182,190 +291,71 @@ window.api = {
             });
             
             if (!response.ok) {
-                const errorData = await response.json();
-                throw new Error(errorData.message || 'Falha ao atualizar perfil');
+                const data = await response.json();
+                throw new Error(data.error || 'Erro ao atualizar perfil');
             }
             
-            return await response.json();
+            const data = await response.json();
+            return data;
         } catch (error) {
-            console.error('Erro ao atualizar perfil:', error);
+            console.error('Erro ao atualizar perfil do paciente:', error);
             throw error;
         }
     },
     
-    // Cadastros
-    registerPatient: async function(patientData) {
+    // Método para atualizar perfil do profissional
+    updateProfessionalProfile: async function(profileData) {
         try {
-            const response = await fetch(`${API_BASE_URL}/api/patient/register`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify(patientData)
-            });
+            const token = localStorage.getItem('token');
+            if (!token) {
+                throw new Error('Usuário não autenticado');
+            }
             
-            if (!response.ok) {
-                if (response.status === 400) {
-                    const errorData = await response.json();
-                    if (errorData.error && errorData.error.includes('Email já cadastrado')) {
-                        throw new Error('Este email já está em uso. Por favor, utilize outro email ou faça login.');
-                    } else {
-                        throw new Error(errorData.error || 'Dados de cadastro inválidos');
-                    }
-                } else {
-                    throw new Error('Erro no servidor. Tente novamente mais tarde.');
+            const userData = this.getUserData();
+            if (!userData || !userData.id) {
+                throw new Error('Dados do usuário não encontrados');
+            }
+            
+            // Criar FormData para envio de arquivos
+            const formData = new FormData();
+            
+            // Adicionar dados do profissional
+            Object.keys(profileData).forEach(key => {
+                if (key !== 'diploma' || (key === 'diploma' && profileData[key] instanceof File)) {
+                    formData.append(key, profileData[key]);
                 }
-            }
-            
-            return await response.json();
-        } catch (error) {
-            console.error('Erro no cadastro de paciente:', error);
-            throw error;
-        }
-    },
-    
-    registerProfessional: async function(formData) {
-        try {
-            const response = await fetch(`${API_BASE_URL}/api/auth/register/professional`, {
-                method: 'POST',
-                body: formData // FormData já está configurado para multipart/form-data
             });
             
-            if (!response.ok) {
-                if (response.status === 400) {
-                    const errorData = await response.json();
-                    if (errorData.error && errorData.error.includes('Email já cadastrado')) {
-                        throw new Error('Este email já está em uso. Por favor, utilize outro email ou faça login.');
-                    } else {
-                        throw new Error(errorData.error || 'Dados de cadastro inválidos');
-                    }
-                } else {
-                    throw new Error('Erro no servidor. Tente novamente mais tarde.');
-                }
-            }
-            
-            return await response.json();
-        } catch (error) {
-            console.error('Erro no cadastro de profissional:', error);
-            throw error;
-        }
-    },
-    
-    // Atividades e Categorias
-    getActivities: async function() {
-        try {
-            const response = await fetch(`${API_BASE_URL}/api/search/activities`);
-            
-            if (!response.ok) {
-                console.error('Erro ao buscar atividades:', response.status);
-                return []; // Retornar array vazio em caso de erro para evitar quebra da interface
-            }
-            
-            return await response.json();
-        } catch (error) {
-            console.error('Erro ao buscar atividades:', error);
-            return []; // Retornar array vazio em caso de exceção
-        }
-    },
-    
-    getCategories: async function() {
-        try {
-            const response = await fetch(`${API_BASE_URL}/api/search/categories`);
-            
-            if (!response.ok) {
-                console.error('Erro ao buscar categorias:', response.status);
-                return []; // Retornar array vazio em caso de erro para evitar quebra da interface
-            }
-            
-            return await response.json();
-        } catch (error) {
-            console.error('Erro ao buscar categorias:', error);
-            return []; // Retornar array vazio em caso de exceção
-        }
-    },
-    
-    createCategory: async function(categoryData) {
-        try {
-            const token = this.getToken();
-            if (!token) throw new Error('Autenticação necessária');
-            
-            const response = await fetch(`${API_BASE_URL}/api/admin/categories`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${token}`
-                },
-                body: JSON.stringify(categoryData)
-            });
-            
-            if (!response.ok) {
-                const errorData = await response.json();
-                throw new Error(errorData.message || 'Falha ao criar categoria');
-            }
-            
-            return await response.json();
-        } catch (error) {
-            console.error('Erro ao criar categoria:', error);
-            throw error;
-        }
-    },
-    
-    updateCategory: async function(categoryId, categoryData) {
-        try {
-            const token = this.getToken();
-            if (!token) throw new Error('Autenticação necessária');
-            
-            const response = await fetch(`${API_BASE_URL}/api/admin/categories/${categoryId}`, {
+            const response = await fetch(`${this.baseUrl}/professional/${userData.id}`, {
                 method: 'PUT',
                 headers: {
-                    'Content-Type': 'application/json',
                     'Authorization': `Bearer ${token}`
                 },
-                body: JSON.stringify(categoryData)
+                body: formData
             });
             
             if (!response.ok) {
-                const errorData = await response.json();
-                throw new Error(errorData.message || 'Falha ao atualizar categoria');
+                const data = await response.json();
+                throw new Error(data.error || 'Erro ao atualizar perfil');
             }
             
-            return await response.json();
+            const data = await response.json();
+            return data;
         } catch (error) {
-            console.error('Erro ao atualizar categoria:', error);
+            console.error('Erro ao atualizar perfil do profissional:', error);
             throw error;
         }
     },
     
-    deleteCategory: async function(categoryId) {
+    // Método para adicionar atividade (admin)
+    addActivity: async function(activityData) {
         try {
-            const token = this.getToken();
-            if (!token) throw new Error('Autenticação necessária');
-            
-            const response = await fetch(`${API_BASE_URL}/api/admin/categories/${categoryId}`, {
-                method: 'DELETE',
-                headers: {
-                    'Authorization': `Bearer ${token}`
-                }
-            });
-            
-            if (!response.ok) {
-                const errorData = await response.json();
-                throw new Error(errorData.message || 'Falha ao excluir categoria');
+            const token = localStorage.getItem('token');
+            if (!token) {
+                throw new Error('Usuário não autenticado');
             }
             
-            return await response.json();
-        } catch (error) {
-            console.error('Erro ao excluir categoria:', error);
-            throw error;
-        }
-    },
-    
-    createActivity: async function(activityData) {
-        try {
-            const token = this.getToken();
-            if (!token) throw new Error('Autenticação necessária');
-            
-            const response = await fetch(`${API_BASE_URL}/api/admin/activities`, {
+            const response = await fetch(`${this.baseUrl}/admin/activities`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -375,82 +365,53 @@ window.api = {
             });
             
             if (!response.ok) {
-                const errorData = await response.json();
-                throw new Error(errorData.message || 'Falha ao criar atividade');
+                const data = await response.json();
+                throw new Error(data.error || 'Erro ao adicionar atividade');
             }
             
-            return await response.json();
+            const data = await response.json();
+            return data;
         } catch (error) {
-            console.error('Erro ao criar atividade:', error);
+            console.error('Erro ao adicionar atividade:', error);
             throw error;
         }
     },
     
-    // Busca de profissionais
-    searchProfessionals: async function(filters = {}) {
-        try {
-            let url = `${API_BASE_URL}/api/search/professionals`;
-            
-            // Adicionar parâmetros de busca se fornecidos
-            const params = new URLSearchParams();
-            if (filters.activity) params.append('activity_id', filters.activity);
-            if (filters.category) params.append('category', filters.category);
-            if (filters.name) params.append('name', filters.name);
-            
-            if (params.toString()) {
-                url += `?${params.toString()}`;
-            }
-            
-            const response = await fetch(url);
-            
-            if (!response.ok) {
-                if (response.status === 404) {
-                    return []; // Retornar array vazio se não encontrar profissionais
-                } else {
-                    throw new Error('Falha ao buscar profissionais');
-                }
-            }
-            
-            return await response.json();
-        } catch (error) {
-            console.error('Erro ao buscar profissionais:', error);
-            throw error;
-        }
-    },
-    
-    // Painel administrativo
+    // Método para listar profissionais pendentes (admin)
     getPendingProfessionals: async function() {
         try {
-            const token = this.getToken();
-            if (!token) throw new Error('Autenticação necessária');
+            const token = localStorage.getItem('token');
+            if (!token) {
+                throw new Error('Usuário não autenticado');
+            }
             
-            const response = await fetch(`${API_BASE_URL}/api/admin/pending_professionals`, {
+            const response = await fetch(`${this.baseUrl}/admin/professionals/pending`, {
                 headers: {
                     'Authorization': `Bearer ${token}`
                 }
             });
             
             if (!response.ok) {
-                if (response.status === 404) {
-                    return []; // Retornar array vazio se não encontrar profissionais pendentes
-                } else {
-                    throw new Error('Falha ao buscar profissionais pendentes');
-                }
+                throw new Error('Erro ao buscar profissionais pendentes');
             }
             
-            return await response.json();
+            const data = await response.json();
+            return data;
         } catch (error) {
             console.error('Erro ao buscar profissionais pendentes:', error);
             throw error;
         }
     },
     
+    // Método para aprovar profissional (admin)
     approveProfessional: async function(professionalId) {
         try {
-            const token = this.getToken();
-            if (!token) throw new Error('Autenticação necessária');
+            const token = localStorage.getItem('token');
+            if (!token) {
+                throw new Error('Usuário não autenticado');
+            }
             
-            const response = await fetch(`${API_BASE_URL}/api/admin/approve_professional/${professionalId}`, {
+            const response = await fetch(`${this.baseUrl}/admin/professionals/${professionalId}/approve`, {
                 method: 'PUT',
                 headers: {
                     'Authorization': `Bearer ${token}`
@@ -458,23 +419,27 @@ window.api = {
             });
             
             if (!response.ok) {
-                const errorData = await response.json();
-                throw new Error(errorData.message || 'Falha ao aprovar profissional');
+                const data = await response.json();
+                throw new Error(data.error || 'Erro ao aprovar profissional');
             }
             
-            return await response.json();
+            const data = await response.json();
+            return data;
         } catch (error) {
             console.error('Erro ao aprovar profissional:', error);
             throw error;
         }
     },
     
+    // Método para rejeitar profissional (admin)
     rejectProfessional: async function(professionalId) {
         try {
-            const token = this.getToken();
-            if (!token) throw new Error('Autenticação necessária');
+            const token = localStorage.getItem('token');
+            if (!token) {
+                throw new Error('Usuário não autenticado');
+            }
             
-            const response = await fetch(`${API_BASE_URL}/api/admin/reject_professional/${professionalId}`, {
+            const response = await fetch(`${this.baseUrl}/admin/professionals/${professionalId}/reject`, {
                 method: 'PUT',
                 headers: {
                     'Authorization': `Bearer ${token}`
@@ -482,11 +447,12 @@ window.api = {
             });
             
             if (!response.ok) {
-                const errorData = await response.json();
-                throw new Error(errorData.message || 'Falha ao rejeitar profissional');
+                const data = await response.json();
+                throw new Error(data.error || 'Erro ao rejeitar profissional');
             }
             
-            return await response.json();
+            const data = await response.json();
+            return data;
         } catch (error) {
             console.error('Erro ao rejeitar profissional:', error);
             throw error;

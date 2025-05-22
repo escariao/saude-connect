@@ -306,7 +306,8 @@
                 displayCategories.forEach(category => {
                     const icon = categoryIcons[category.name] || 'bi-star';
                     
-                    const categoryCard = document.createElement('div');
+                    const categoryCard = document.createElement('a');
+                    categoryCard.href = `busca.html?category=${category.id}`;
                     categoryCard.innerHTML = `
                         <div class="category-card">
                             <div class="card-body text-center">
@@ -314,18 +315,16 @@
                                     <i class="bi ${icon}"></i>
                                 </div>
                                 <h5 class="card-title">${category.name}</h5>
-                                <p class="card-text">${category.description || `Profissionais da área de ${category.name}`}</p>
-                                <a href="busca.html?category=${encodeURIComponent(category.name)}" class="stretched-link"></a>
+                                <p class="card-text">Profissionais da área de ${category.name}</p>
                             </div>
                         </div>
                     `;
-                    
                     categoriesContainer.appendChild(categoryCard);
                 });
             } catch (error) {
-                console.error("Erro ao carregar categorias:", error);
+                console.error('Erro ao carregar categorias:', error);
                 const categoriesContainer = document.getElementById('categories-container');
-                categoriesContainer.innerHTML = '<p class="text-center">Erro ao carregar categorias. Tente novamente mais tarde.</p>';
+                categoriesContainer.innerHTML = '<p class="text-center text-danger">Erro ao carregar categorias. Tente novamente mais tarde.</p>';
             }
         }
     </script>

@@ -84,7 +84,6 @@ body {
     transition: transform 0.3s ease, box-shadow 0.3s ease;
     height: 100%;
     overflow: hidden;
-    cursor: pointer;
 }
 
 .category-card:hover {
@@ -308,11 +307,22 @@ footer {
 }
 
 .invalid-feedback {
-    display: block;
+    display: none;
     width: 100%;
     margin-top: 0.25rem;
     font-size: 0.875em;
     color: #dc3545;
+}
+
+/* Ícones de categorias */
+.category-icon-dentista {
+    color: var(--primary-color);
+    font-size: 2rem;
+}
+
+.category-icon-auxiliar-bucal {
+    color: var(--primary-color);
+    font-size: 2rem;
 }
 
 /* Responsividade */
