@@ -5,9 +5,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Busca de Profissionais - Saúde Connect</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
     <link href="css/styles.css" rel="stylesheet">
 </head>
 <body>
+    <!-- Menu responsivo estilo Upwork -->
     <nav class="navbar navbar-expand-lg navbar-dark">
         <div class="container">
             <a class="navbar-brand" href="index.html">Saúde Connect</a>
@@ -17,25 +19,42 @@
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav ms-auto">
                     <li class="nav-item">
-                        <a class="nav-link" href="index.html">Início</a>
+                        <a class="nav-link" href="index.html">
+                            <i class="bi bi-house-door"></i> Início
+                        </a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link active" href="busca.html">Buscar Profissionais</a>
+                        <a class="nav-link active" href="busca.html">
+                            <i class="bi bi-search"></i> Buscar Profissionais
+                        </a>
                     </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="cadastro-paciente.html">Cadastro Paciente</a>
+                    <!-- Links de cadastro (visíveis apenas para visitantes) -->
+                    <li class="nav-item dropdown" id="cadastro-dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            <i class="bi bi-person-plus"></i> Cadastre-se
+                        </a>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" href="cadastro-paciente.html">Como Paciente</a></li>
+                            <li><a class="dropdown-item" href="cadastro-profissional.html">Como Profissional</a></li>
+                        </ul>
                     </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="cadastro-profissional.html">Cadastro Profissional</a>
-                    </li>
+                    <!-- Link de login (visível apenas para visitantes) -->
                     <li class="nav-item" id="login-nav-item">
-                        <a class="nav-link" href="login.html">Login</a>
+                        <a class="nav-link" href="login.html">
+                            <i class="bi bi-box-arrow-in-right"></i> Login
+                        </a>
                     </li>
-                    <li class="nav-item d-none" id="profile-nav-item">
-                        <a class="nav-link" href="#" id="profile-link">Meu Perfil</a>
-                    </li>
-                    <li class="nav-item d-none" id="logout-nav-item">
-                        <a class="nav-link" href="#" id="logout-link">Sair</a>
+                    <!-- Links para usuários autenticados (inicialmente ocultos) -->
+                    <li class="nav-item dropdown d-none" id="user-dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            <i class="bi bi-person-circle"></i> <span id="user-name">Minha Conta</span>
+                        </a>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" href="#" id="profile-link">Meu Perfil</a></li>
+                            <li><a class="dropdown-item d-none" id="admin-link" href="admin.html">Painel Admin</a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item" href="#" id="logout-link">Sair</a></li>
+                        </ul>
                     </li>
                 </ul>
             </div>
@@ -67,7 +86,9 @@
                                         </select>
                                     </div>
                                     <div class="col-md-2 mb-3 d-flex align-items-end">
-                                        <button type="submit" class="btn btn-primary w-100">Buscar</button>
+                                        <button type="submit" class="btn btn-primary w-100">
+                                            <i class="bi bi-search"></i> Buscar
+                                        </button>
                                     </div>
                                 </div>
                             </form>
@@ -76,9 +97,24 @@
                 </div>
             </div>
             
+            <!-- Categorias em destaque -->
+            <div class="row mb-4">
+                <div class="col-12">
+                    <h3 class="mb-3">Categorias Profissionais</h3>
+                    <div class="category-grid" id="categories-container">
+                        <!-- As categorias serão carregadas dinamicamente via JavaScript -->
+                        <div class="text-center py-3">
+                            <div class="spinner-border text-primary" role="status">
+                                <span class="visually-hidden">Carregando...</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
             <div id="results-container">
                 <div class="text-center py-5">
-                    <p>Utilize os filtros acima para buscar profissionais de saúde.</p>
+                    <p>Utilize os filtros acima para buscar profissionais de saúde ou selecione uma categoria.</p>
                 </div>
             </div>
         </div>
@@ -139,30 +175,51 @@
                 updateAuthUI();
                 window.location.href = 'index.html';
             });
+            
+            // Verificar se há parâmetros de busca na URL
+            const urlParams = new URLSearchParams(window.location.search);
+            const categoryParam = urlParams.get('category');
+            if (categoryParam) {
+                document.getElementById('category').value = categoryParam;
+                searchProfessionals();
+            }
         });
         
         function updateAuthUI() {
             const isAuthenticated = window.api.isAuthenticated();
             const userType = window.api.getUserType();
+            const userData = window.api.getUserData();
             
             // Atualizar itens de navegação
             document.getElementById('login-nav-item').classList.toggle('d-none', isAuthenticated);
-            document.getElementById('profile-nav-item').classList.toggle('d-none', !isAuthenticated);
-            document.getElementById('logout-nav-item').classList.toggle('d-none', !isAuthenticated);
+            document.getElementById('cadastro-dropdown').classList.toggle('d-none', isAuthenticated);
+            document.getElementById('user-dropdown').classList.toggle('d-none', !isAuthenticated);
             
-            // Configurar link de perfil
-            if (isAuthenticated) {
+            // Configurar menu do usuário autenticado
+            if (isAuthenticated && userData) {
+                // Mostrar nome do usuário
+                document.getElementById('user-name').textContent = userData.name || 'Minha Conta';
+                
+                // Configurar link de perfil
                 const profileLink = document.getElementById('profile-link');
+                const adminLink = document.getElementById('admin-link');
+                
                 if (userType === 'admin') {
                     profileLink.href = 'admin.html';
                     profileLink.textContent = 'Painel Admin';
+                    adminLink.classList.add('d-none'); // Ocultar link duplicado
                 } else if (userType === 'professional') {
                     profileLink.href = 'perfil-profissional.html';
                     profileLink.textContent = 'Meu Perfil';
+                    adminLink.classList.add('d-none');
                 } else if (userType === 'patient') {
                     profileLink.href = 'perfil-paciente.html';
                     profileLink.textContent = 'Meu Perfil';
+                    adminLink.classList.add('d-none');
                 }
+                
+                // Mostrar link de admin apenas para administradores
+                adminLink.classList.toggle('d-none', userType !== 'admin');
             }
         }
         
@@ -176,12 +233,14 @@
                     activitySelect.remove(1);
                 }
                 
-                activities.forEach(activity => {
-                    const option = document.createElement('option');
-                    option.value = activity.id;
-                    option.textContent = activity.name;
-                    activitySelect.appendChild(option);
-                });
+                if (activities && activities.length > 0) {
+                    activities.forEach(activity => {
+                        const option = document.createElement('option');
+                        option.value = activity.id;
+                        option.textContent = activity.name;
+                        activitySelect.appendChild(option);
+                    });
+                }
             } catch (error) {
                 console.error('Erro ao carregar atividades:', error);
                 // Mostrar mensagem de erro na interface
@@ -198,25 +257,82 @@
             try {
                 const categories = await window.api.getCategories();
                 const categorySelect = document.getElementById('category');
+                const categoriesContainer = document.getElementById('categories-container');
                 
                 // Limpar opções existentes, mantendo apenas a opção padrão
                 while (categorySelect.options.length > 1) {
                     categorySelect.remove(1);
                 }
                 
+                // Limpar o container de categorias
+                categoriesContainer.innerHTML = '';
+                
+                if (!categories || categories.length === 0) {
+                    categoriesContainer.innerHTML = '<p class="text-center">Nenhuma categoria encontrada.</p>';
+                    return;
+                }
+                
+                // Ícones para as categorias (associados por nome)
+                const categoryIcons = {
+                    'Acupunturista': 'bi-pin',
+                    'Auxiliar de Saúde Bucal': 'bi-tooth',
+                    'Cuidador': 'bi-heart-pulse',
+                    'Dentista': 'bi-tooth',
+                    'Doula': 'bi-person-heart',
+                    'Educador Físico': 'bi-bicycle',
+                    'Enfermeiro': 'bi-bandaid',
+                    'Farmacêutico Clínico': 'bi-capsule',
+                    'Fisioterapeuta': 'bi-activity',
+                    'Fonoaudiólogo': 'bi-mic',
+                    'Maqueiro': 'bi-truck',
+                    'Massoterapeuta': 'bi-hand-index-thumb',
+                    'Nutricionista': 'bi-apple',
+                    'Podólogo': 'bi-emoji-smile',
+                    'Psicólogo': 'bi-chat-square-heart',
+                    'Técnico de Enfermagem': 'bi-clipboard2-pulse',
+                    'Técnico em Análises Clínicas': 'bi-eyedropper',
+                    'Técnico em Radiologia': 'bi-radioactive',
+                    'Terapeuta Ocupacional': 'bi-people'
+                };
+                
+                // Adicionar opções ao select
                 categories.forEach(category => {
                     if (category && category.name) {
                         const option = document.createElement('option');
                         option.value = category.id;
                         option.textContent = category.name;
                         categorySelect.appendChild(option);
+                        
+                        // Criar card para a categoria
+                        const icon = categoryIcons[category.name] || 'bi-star';
+                        
+                        const categoryCard = document.createElement('div');
+                        categoryCard.innerHTML = `
+                            <div class="category-card">
+                                <div class="card-body text-center">
+                                    <div class="category-icon">
+                                        <i class="bi ${icon}"></i>
+                                    </div>
+                                    <h5 class="card-title">${category.name}</h5>
+                                    <p class="card-text">${category.description || `Profissionais da área de ${category.name}`}</p>
+                                </div>
+                            </div>
+                        `;
+                        
+                        // Adicionar evento de clique para filtrar por categoria
+                        categoryCard.addEventListener('click', function() {
+                            document.getElementById('category').value = category.id;
+                            searchProfessionals();
+                        });
+                        
+                        categoriesContainer.appendChild(categoryCard);
                     }
                 });
             } catch (error) {
                 console.error('Erro ao carregar categorias:', error);
                 // Mostrar mensagem de erro na interface
-                const resultsContainer = document.getElementById('results-container');
-                resultsContainer.innerHTML = `
+                const categoriesContainer = document.getElementById('categories-container');
+                categoriesContainer.innerHTML = `
                     <div class="alert alert-danger">
                         Erro ao carregar categorias: ${error.message || 'Tente novamente mais tarde.'}
                     </div>
@@ -229,7 +345,14 @@
             const category = document.getElementById('category').value;
             const resultsContainer = document.getElementById('results-container');
             
-            resultsContainer.innerHTML = '<div class="text-center py-5"><p>Buscando profissionais...</p></div>';
+            resultsContainer.innerHTML = `
+                <div class="text-center py-5">
+                    <div class="spinner-border text-primary" role="status">
+                        <span class="visually-hidden">Buscando profissionais...</span>
+                    </div>
+                    <p class="mt-2">Buscando profissionais...</p>
+                </div>
+            `;
             
             try {
                 const filters = {};
@@ -259,7 +382,17 @@
                         <div class="col-md-6 mb-4">
                             <div class="card professional-card">
                                 <div class="card-body">
-                                    <h5 class="card-title">${prof.name}</h5>
+                                    <div class="d-flex align-items-center mb-3">
+                                        <div class="flex-shrink-0">
+                                            <div class="rounded-circle bg-light text-primary d-flex align-items-center justify-content-center" style="width: 60px; height: 60px;">
+                                                <i class="bi bi-person-circle" style="font-size: 2rem;"></i>
+                                            </div>
+                                        </div>
+                                        <div class="flex-grow-1 ms-3">
+                                            <h5 class="card-title mb-0">${prof.name}</h5>
+                                            <p class="text-muted mb-0">${prof.activities[0]?.category || 'Profissional de Saúde'}</p>
+                                        </div>
+                                    </div>
                                     <p class="card-text">${prof.bio || 'Sem biografia'}</p>
                                     <div class="mb-3">
                                         <strong>Especialidades:</strong><br>
@@ -290,11 +423,6 @@
                     </div>
                 `;
             }
-        }
-        
-        function showProfessionalDetails(profId) {
-            // Implementar modal ou redirecionamento para página de detalhes
-            alert('Funcionalidade de detalhes será implementada em breve!');
         }
     </script>
 </body>

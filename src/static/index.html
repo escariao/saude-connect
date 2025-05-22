@@ -5,9 +5,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Saúde Connect - Conectando Profissionais de Saúde e Pacientes</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
     <link href="css/styles.css" rel="stylesheet">
 </head>
 <body>
+    <!-- Menu responsivo estilo Upwork -->
     <nav class="navbar navbar-expand-lg navbar-dark">
         <div class="container">
             <a class="navbar-brand" href="index.html">Saúde Connect</a>
@@ -17,25 +19,42 @@
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav ms-auto">
                     <li class="nav-item">
-                        <a class="nav-link active" href="index.html">Início</a>
+                        <a class="nav-link active" href="index.html">
+                            <i class="bi bi-house-door"></i> Início
+                        </a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="busca.html">Buscar Profissionais</a>
+                        <a class="nav-link" href="busca.html">
+                            <i class="bi bi-search"></i> Buscar Profissionais
+                        </a>
                     </li>
-                    <li class="nav-item" id="cadastro-paciente-nav">
-                        <a class="nav-link" href="cadastro-paciente.html">Cadastro Paciente</a>
+                    <!-- Links de cadastro (visíveis apenas para visitantes) -->
+                    <li class="nav-item dropdown" id="cadastro-dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            <i class="bi bi-person-plus"></i> Cadastre-se
+                        </a>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" href="cadastro-paciente.html">Como Paciente</a></li>
+                            <li><a class="dropdown-item" href="cadastro-profissional.html">Como Profissional</a></li>
+                        </ul>
                     </li>
-                    <li class="nav-item" id="cadastro-profissional-nav">
-                        <a class="nav-link" href="cadastro-profissional.html">Cadastro Profissional</a>
-                    </li>
+                    <!-- Link de login (visível apenas para visitantes) -->
                     <li class="nav-item" id="login-nav-item">
-                        <a class="nav-link" href="login.html">Login</a>
+                        <a class="nav-link" href="login.html">
+                            <i class="bi bi-box-arrow-in-right"></i> Login
+                        </a>
                     </li>
-                    <li class="nav-item d-none" id="profile-nav-item">
-                        <a class="nav-link" href="#" id="profile-link">Meu Perfil</a>
-                    </li>
-                    <li class="nav-item d-none" id="logout-nav-item">
-                        <a class="nav-link" href="#" id="logout-link">Sair</a>
+                    <!-- Links para usuários autenticados (inicialmente ocultos) -->
+                    <li class="nav-item dropdown d-none" id="user-dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            <i class="bi bi-person-circle"></i> <span id="user-name">Minha Conta</span>
+                        </a>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" href="#" id="profile-link">Meu Perfil</a></li>
+                            <li><a class="dropdown-item d-none" id="admin-link" href="admin.html">Painel Admin</a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item" href="#" id="logout-link">Sair</a></li>
+                        </ul>
                     </li>
                 </ul>
             </div>
@@ -49,6 +68,21 @@
             <div class="d-flex justify-content-center gap-3">
                 <a href="busca.html" class="btn btn-primary">Buscar Profissionais</a>
                 <a href="cadastro-profissional.html" class="btn btn-outline-light">Cadastrar como Profissional</a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Seção de categorias em destaque (estilo Upwork) -->
+    <section class="py-5">
+        <div class="container">
+            <h2 class="section-title text-center">Categorias em Destaque</h2>
+            <div class="category-grid" id="categories-container">
+                <!-- As categorias serão carregadas dinamicamente via JavaScript -->
+                <div class="text-center py-3">
+                    <div class="spinner-border text-primary" role="status">
+                        <span class="visually-hidden">Carregando...</span>
+                    </div>
+                </div>
             </div>
         </div>
     </section>
@@ -173,6 +207,9 @@
             // Verificar autenticação e atualizar menu
             updateAuthUI();
             
+            // Carregar categorias para a página inicial
+            loadCategoriesForHomepage();
+            
             // Configurar logout
             document.getElementById('logout-link').addEventListener('click', function(e) {
                 e.preventDefault();
@@ -185,29 +222,127 @@
         function updateAuthUI() {
             const isAuthenticated = window.api.isAuthenticated();
             const userType = window.api.getUserType();
+            const userData = window.api.getUserData();
             
             // Atualizar itens de navegação
             document.getElementById('login-nav-item').classList.toggle('d-none', isAuthenticated);
-            document.getElementById('profile-nav-item').classList.toggle('d-none', !isAuthenticated);
-            document.getElementById('logout-nav-item').classList.toggle('d-none', !isAuthenticated);
+            document.getElementById('cadastro-dropdown').classList.toggle('d-none', isAuthenticated);
+            document.getElementById('user-dropdown').classList.toggle('d-none', !isAuthenticated);
             
-            // Ocultar links de cadastro quando autenticado
-            document.getElementById('cadastro-paciente-nav').classList.toggle('d-none', isAuthenticated);
-            document.getElementById('cadastro-profissional-nav').classList.toggle('d-none', isAuthenticated);
-            
-            // Configurar link de perfil
-            if (isAuthenticated) {
+            // Configurar menu do usuário autenticado
+            if (isAuthenticated && userData) {
+                // Mostrar nome do usuário
+                document.getElementById('user-name').textContent = userData.name || 'Minha Conta';
+                
+                // Configurar link de perfil
                 const profileLink = document.getElementById('profile-link');
+                const adminLink = document.getElementById('admin-link');
+                
                 if (userType === 'admin') {
                     profileLink.href = 'admin.html';
                     profileLink.textContent = 'Painel Admin';
+                    adminLink.classList.add('d-none'); // Ocultar link duplicado
                 } else if (userType === 'professional') {
                     profileLink.href = 'perfil-profissional.html';
                     profileLink.textContent = 'Meu Perfil';
+                    adminLink.classList.add('d-none');
                 } else if (userType === 'patient') {
                     profileLink.href = 'perfil-paciente.html';
                     profileLink.textContent = 'Meu Perfil';
+                    adminLink.classList.add('d-none');
                 }
+                
+                // Mostrar link de admin apenas para administradores
+                adminLink.classList.toggle('d-none', userType !== 'admin');
+            }
+        }
+        
+        async function loadCategoriesForHomepage() {
+            try {
+                const categories = await window.api.getCategories();
+                const categoriesContainer = document.getElementById('categories-container');
+                
+                if (!categories || categories.length === 0) {
+                    categoriesContainer.innerHTML = '<p class="text-center">Nenhuma categoria encontrada.</p>';
+                    return;
+                }
+                
+                // Limpar o container
+                categoriesContainer.innerHTML = '';
+                
+                // Ícones para as categorias (associados por nome)
+                const categoryIcons = {
+                    'Acupunturista': 'bi-pin',
+                    'Auxiliar de Saúde Bucal': 'bi-tooth',
+                    'Cuidador': 'bi-heart-pulse',
+                    'Dentista': 'bi-tooth',
+                    'Doula': 'bi-person-heart',
+                    'Educador Físico': 'bi-bicycle',
+                    'Enfermeiro': 'bi-bandaid',
+                    'Farmacêutico Clínico': 'bi-capsule',
+                    'Fisioterapeuta': 'bi-activity',
+                    'Fonoaudiólogo': 'bi-mic',
+                    'Maqueiro': 'bi-truck',
+                    'Massoterapeuta': 'bi-hand-index-thumb',
+                    'Nutricionista': 'bi-apple',
+                    'Podólogo': 'bi-emoji-smile',
+                    'Psicólogo': 'bi-chat-square-heart',
+                    'Técnico de Enfermagem': 'bi-clipboard2-pulse',
+                    'Técnico em Análises Clínicas': 'bi-eyedropper',
+                    'Técnico em Radiologia': 'bi-radioactive',
+                    'Terapeuta Ocupacional': 'bi-people'
+                };
+                
+                // Mostrar apenas as primeiras 8 categorias na página inicial
+                const displayCategories = categories.slice(0, 8);
+                
+                displayCategories.forEach(category => {
+                    const icon = categoryIcons[category.name] || 'bi-star';
+                    
+                    const categoryCard = document.createElement('div');
+                    categoryCard.innerHTML = `
+                        <div class="category-card">
+                            <div class="card-body text-center">
+                                <div class="category-icon">
+                                    <i class="bi ${icon}"></i>
+                                </div>
+                                <h5 class="card-title">${category.name}</h5>
+                                <p class="card-text">${category.description || `Profissionais da área de ${category.name}`}</p>
+                                <a href="busca.html?category=${category.id}" class="stretched-link"></a>
+                            </div>
+                        </div>
+                    `;
+                    
+                    categoriesContainer.appendChild(categoryCard);
+                });
+                
+                // Adicionar card "Ver todas as categorias" se houver mais de 8
+                if (categories.length > 8) {
+                    const viewAllCard = document.createElement('div');
+                    viewAllCard.innerHTML = `
+                        <div class="category-card">
+                            <div class="card-body text-center">
+                                <div class="category-icon">
+                                    <i class="bi bi-grid-3x3-gap"></i>
+                                </div>
+                                <h5 class="card-title">Ver todas</h5>
+                                <p class="card-text">Explore todas as categorias disponíveis</p>
+                                <a href="busca.html" class="stretched-link"></a>
+                            </div>
+                        </div>
+                    `;
+                    
+                    categoriesContainer.appendChild(viewAllCard);
+                }
+                
+            } catch (error) {
+                console.error('Erro ao carregar categorias:', error);
+                const categoriesContainer = document.getElementById('categories-container');
+                categoriesContainer.innerHTML = `
+                    <div class="alert alert-danger">
+                        Erro ao carregar categorias: ${error.message || 'Tente novamente mais tarde.'}
+                    </div>
+                `;
             }
         }
     </script>
