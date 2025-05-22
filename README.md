@@ -4,7 +4,9 @@
 [![GitHub issues](https://img.shields.io/github/issues/escariao/saude-connect)](https://github.com/escariao/saude-connect/issues)
 [![GitHub last commit](https://img.shields.io/github/last-commit/escariao/saude-connect)](https://github.com/escariao/saude-connect/commits/master)
 
-O **Saúde Connect** é uma plataforma que conecta profissionais de saúde freelancers com pacientes que buscam atendimento especializado. O sistema permite que profissionais cadastrem múltiplas especialidades e serviços, enquanto pacientes podem encontrar o profissional ideal para suas necessidades de saúde.
+O **Saúde Connect** é uma plataforma que conecta profissionais de saúde freelancers com pacientes que buscam atendimento especializado. O sistema permite que profissionais cadastrem múltiplas especialidades e serviços, enquanto pacientes podem encontrar o profissional ideal para suas necessidades de saúde.  
+
+**Funcionamento online**: https://saude-connect.onrender.com  
 
 ## 🚀 **Principais Funcionalidades**
 
