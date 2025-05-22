@@ -457,27 +457,25 @@
             
             async function loadCategories() {
                 try {
-                    const response = await fetch('/api/admin/categories');
-                    
-                    if (!response.ok) {
-                        throw new Error('Falha ao carregar categorias');
-                    }
-                    
-                    const categories = await response.json();
+                    const categories = await window.api.getCategories();
                     const container = document.getElementById('categories-list-container');
                     const activityCategorySelect = document.getElementById('activity-category');
                     const editActivityCategorySelect = document.getElementById('edit-activity-category');
                     
                     // Preencher selects de categorias
                     activityCategorySelect.innerHTML = '<option value="">Selecione uma categoria</option>';
-                    editActivityCategorySelect.innerHTML = '<option value="">Selecione uma categoria</option>';
+                    if (editActivityCategorySelect) {
+                        editActivityCategorySelect.innerHTML = '<option value="">Selecione uma categoria</option>';
+                    }
                     
                     categories.forEach(category => {
                         const option = document.createElement('option');
                         option.value = category.id;
                         option.textContent = category.name;
                         activityCategorySelect.appendChild(option.cloneNode(true));
-                        editActivityCategorySelect.appendChild(option);
+                        if (editActivityCategorySelect) {
+                            editActivityCategorySelect.appendChild(option.cloneNode(true));
+                        }
                     });
                     
                     if (categories.length === 0) {
@@ -556,13 +554,7 @@
             
             async function loadActivities() {
                 try {
-                    const response = await fetch('/api/activities');
-                    
-                    if (!response.ok) {
-                        throw new Error('Falha ao carregar atividades');
-                    }
-                    
-                    const activities = await response.json();
+                    const activities = await window.api.getActivities();
                     const container = document.getElementById('activities-list-container');
                     
                     if (activities.length === 0) {
