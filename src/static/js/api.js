@@ -82,7 +82,7 @@ window.api = {
     // Método para cadastrar paciente
     registerPatient: async function(patientData) {
         try {
-            const response = await fetch(`${this.baseUrl}/patient/register`, {
+            const response = await fetch(`${this.baseUrl}/auth/register/patient`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
@@ -335,36 +335,6 @@ window.api = {
         }
     },
     
-    // Método para adicionar atividade (admin)
-    addActivity: async function(activityData) {
-        try {
-            const token = localStorage.getItem('token');
-            if (!token) {
-                throw new Error('Usuário não autenticado');
-            }
-            
-            const response = await fetch(`${this.baseUrl}/admin/activities`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${token}`
-                },
-                body: JSON.stringify(activityData)
-            });
-            
-            if (!response.ok) {
-                const data = await response.json();
-                throw new Error(data.message || data.error || 'Erro ao adicionar atividade');
-            }
-            
-            const data = await response.json();
-            return data;
-        } catch (error) {
-            console.error('Erro ao adicionar atividade:', error);
-            throw error;
-        }
-    },
-    
     // Método para listar profissionais pendentes (admin)
     getPendingProfessionals: async function() {
         try {
@@ -445,6 +415,174 @@ window.api = {
         } catch (error) {
             console.error('Erro ao rejeitar profissional:', error);
             throw error;
+        }
+    },
+    
+    // Método para criar uma reserva
+    createBooking: async function(bookingData) {
+        try {
+            const token = localStorage.getItem('token');
+            if (!token) {
+                throw new Error('Usuário não autenticado');
+            }
+            
+            const response = await fetch(`${this.baseUrl}/booking/`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
+                body: JSON.stringify(bookingData)
+            });
+            
+            if (!response.ok) {
+                const data = await response.json();
+                throw new Error(data.message || data.error || 'Erro ao criar reserva');
+            }
+            
+            const data = await response.json();
+            return data;
+        } catch (error) {
+            console.error('Erro ao criar reserva:', error);
+            throw error;
+        }
+    },
+    
+    // Método para buscar reservas do usuário
+    getUserBookings: async function(status = null) {
+        try {
+            const token = localStorage.getItem('token');
+            if (!token) {
+                throw new Error('Usuário não autenticado');
+            }
+            
+            let url = `${this.baseUrl}/booking/`;
+            if (status) {
+                url += `?status=${status}`;
+            }
+            
+            const response = await fetch(url, {
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
+            });
+            
+            if (!response.ok) {
+                throw new Error('Erro ao buscar reservas');
+            }
+            
+            const data = await response.json();
+            return data;
+        } catch (error) {
+            console.error('Erro ao buscar reservas:', error);
+            return [];
+        }
+    },
+    
+    // Método para processar pagamento de uma reserva
+    processPayment: async function(bookingId, paymentMethod) {
+        try {
+            const token = localStorage.getItem('token');
+            if (!token) {
+                throw new Error('Usuário não autenticado');
+            }
+            
+            const response = await fetch(`${this.baseUrl}/booking/${bookingId}/payment`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
+                body: JSON.stringify({ payment_method: paymentMethod })
+            });
+            
+            if (!response.ok) {
+                const data = await response.json();
+                throw new Error(data.message || data.error || 'Erro ao processar pagamento');
+            }
+            
+            const data = await response.json();
+            return data;
+        } catch (error) {
+            console.error('Erro ao processar pagamento:', error);
+            throw error;
+        }
+    },
+    
+    // Método para atualizar status de uma reserva
+    updateBookingStatus: async function(bookingId, status) {
+        try {
+            const token = localStorage.getItem('token');
+            if (!token) {
+                throw new Error('Usuário não autenticado');
+            }
+            
+            const response = await fetch(`${this.baseUrl}/booking/${bookingId}/status`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
+                body: JSON.stringify({ status })
+            });
+            
+            if (!response.ok) {
+                const data = await response.json();
+                throw new Error(data.message || data.error || 'Erro ao atualizar status da reserva');
+            }
+            
+            const data = await response.json();
+            return data;
+        } catch (error) {
+            console.error('Erro ao atualizar status da reserva:', error);
+            throw error;
+        }
+    },
+    
+    // Método para criar avaliação
+    createReview: async function(bookingId, reviewData) {
+        try {
+            const token = localStorage.getItem('token');
+            if (!token) {
+                throw new Error('Usuário não autenticado');
+            }
+            
+            const response = await fetch(`${this.baseUrl}/booking/${bookingId}/review`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
+                body: JSON.stringify(reviewData)
+            });
+            
+            if (!response.ok) {
+                const data = await response.json();
+                throw new Error(data.message || data.error || 'Erro ao criar avaliação');
+            }
+            
+            const data = await response.json();
+            return data;
+        } catch (error) {
+            console.error('Erro ao criar avaliação:', error);
+            throw error;
+        }
+    },
+    
+    // Método para buscar avaliações de um profissional
+    getProfessionalReviews: async function(professionalId) {
+        try {
+            const response = await fetch(`${this.baseUrl}/booking/professional/${professionalId}/reviews`);
+            
+            if (!response.ok) {
+                throw new Error('Erro ao buscar avaliações');
+            }
+            
+            const data = await response.json();
+            return data;
+        } catch (error) {
+            console.error('Erro ao buscar avaliações:', error);
+            return { reviews: [], count: 0, average_rating: 0 };
         }
     }
 };
