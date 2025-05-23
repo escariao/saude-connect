@@ -10,8 +10,9 @@ from src.routes.auth import auth_bp
 from src.routes.patient import patient_bp
 from src.routes.admin import admin_bp
 from src.routes.search import search_bp
+from src.routes.booking import booking_bp
 
-app = Flask(__name__, static_folder=os.path.join(os.path.dirname(__file__), 'static'))
+app = Flask(__name__, static_folder=os.path.join(os.path.dirname(__file__), 'public'))
 app.config['SECRET_KEY'] = os.getenv('SECRET_KEY', 'asdf#FGSgvasgf$5$WGT')
 
 # Registrar blueprints
@@ -20,6 +21,7 @@ app.register_blueprint(auth_bp, url_prefix='/api/auth')
 app.register_blueprint(patient_bp, url_prefix='/api/patient')
 app.register_blueprint(admin_bp, url_prefix='/api/admin')
 app.register_blueprint(search_bp, url_prefix='/api/search')
+app.register_blueprint(booking_bp, url_prefix='/api/booking')
 
 # Configuração do banco de dados
 database_url = os.getenv('DATABASE_URL')
@@ -38,7 +40,7 @@ app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db.init_app(app)
 
 # Configuração para upload de arquivos
-app.config['UPLOAD_FOLDER'] = os.path.join(os.path.dirname(__file__), 'static', 'uploads')
+app.config['UPLOAD_FOLDER'] = os.path.join(os.path.dirname(__file__), 'public', 'uploads')
 os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
 
 # Criar tabelas do banco de dados
