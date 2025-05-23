@@ -45,6 +45,26 @@ window.api = {
         }
     },
     
+    // Método para obter o perfil do usuário (função que estava faltando)
+    getUserProfile: function() {
+        try {
+            const userData = localStorage.getItem('userData');
+            if (!userData) return null;
+            
+            const user = JSON.parse(userData);
+            if (user.user_type === 'patient') {
+                return this.getPatientProfile();
+            } else if (user.user_type === 'professional') {
+                return this.getProfessionalProfile();
+            } else {
+                return Promise.resolve(user);
+            }
+        } catch (error) {
+            console.error('Erro ao obter perfil do usuário:', error);
+            return Promise.reject(error);
+        }
+    },
+    
     // Método para fazer login
     login: async function(email, password) {
         try {
@@ -82,6 +102,11 @@ window.api = {
     // Método para cadastrar paciente
     registerPatient: async function(patientData) {
         try {
+            // Garantir que o campo document_number esteja presente
+            if (patientData.document && !patientData.document_number) {
+                patientData.document_number = patientData.document;
+            }
+            
             const response = await fetch(`${this.baseUrl}/auth/register/patient`, {
                 method: 'POST',
                 headers: {
@@ -106,6 +131,11 @@ window.api = {
     // Método para cadastrar profissional
     registerProfessional: async function(formData) {
         try {
+            // Garantir que o campo document_number esteja presente
+            if (formData.get('document') && !formData.get('document_number')) {
+                formData.append('document_number', formData.get('document'));
+            }
+            
             // FormData já deve estar pronto para envio
             const response = await fetch(`${this.baseUrl}/auth/register/professional`, {
                 method: 'POST',
