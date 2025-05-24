@@ -1,197 +1,33 @@
+
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Avaliação de Profissional - Saúde Connect</title>
+    <title>Avaliacao</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
-    <link href="css/styles.css" rel="stylesheet">
 </head>
 <body>
-    <!-- Menu responsivo estilo Upwork -->
-    <nav class="navbar navbar-expand-lg navbar-dark">
-        <div class="container">
-            <a class="navbar-brand" href="index.html">Saúde Connect</a>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
-                <span class="navbar-toggler-icon"></span>
-            </button>
-            <div class="collapse navbar-collapse" id="navbarNav">
-                <ul class="navbar-nav ms-auto">
-                    <li class="nav-item">
-                        <a class="nav-link" href="index.html">
-                            <i class="bi bi-house-door"></i> Início
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="busca.html">
-                            <i class="bi bi-search"></i> Buscar Profissionais
-                        </a>
-                    </li>
-                    <!-- Links dinâmicos serão inseridos via JavaScript -->
-                </ul>
-            </div>
-        </div>
-    </nav>
-
-    <div class="container py-5">
-        <div class="row">
-            <div class="col-lg-8">
-                <div class="card mb-4">
-                    <div class="card-body">
-                        <div class="d-flex align-items-center mb-4">
-                            <img src="https://via.placeholder.com/100" alt="Foto do Profissional" class="rounded-circle me-3" style="width: 80px; height: 80px; object-fit: cover;">
-                            <div>
-                                <h2 id="professional-name">Nome do Profissional</h2>
-                                <p id="professional-category" class="text-muted mb-0">Categoria Profissional</p>
-                                <div class="d-flex align-items-center mt-1">
-                                    <div class="rating me-2">
-                                        <i class="bi bi-star-fill text-warning"></i>
-                                        <i class="bi bi-star-fill text-warning"></i>
-                                        <i class="bi bi-star-fill text-warning"></i>
-                                        <i class="bi bi-star-half text-warning"></i>
-                                        <i class="bi bi-star text-warning"></i>
-                                    </div>
-                                    <span id="average-rating">4.5</span>
-                                    <span id="reviews-count" class="text-muted ms-1">(32 avaliações)</span>
-                                </div>
-                            </div>
-                        </div>
-                        
-                        <h5>Sobre o Profissional</h5>
-                        <p id="professional-bio">Carregando informações do profissional...</p>
-                        
-                        <div class="mt-4">
-                            <h5>Atividades Oferecidas</h5>
-                            <div id="activities-list" class="list-group">
-                                <!-- Atividades serão carregadas dinamicamente -->
-                            </div>
-                        </div>
-                        
-                        <div class="mt-4">
-                            <a href="#" id="booking-btn" class="btn btn-primary">Reservar Atendimento</a>
-                        </div>
-                    </div>
-                </div>
-                
-                <div class="card">
-                    <div class="card-body">
-                        <h4>Avaliações</h4>
-                        
-                        <!-- Seção de avaliação (visível apenas para pacientes logados) -->
-                        <div id="review-section">
-                            <div id="login-required" class="alert alert-info d-none">
-                                Faça <a href="login.html">login</a> como paciente para avaliar este profissional.
-                            </div>
-                            
-                            <div id="no-bookings-message" class="alert alert-info d-none">
-                                Você precisa ter um atendimento concluído com este profissional para poder avaliá-lo.
-                            </div>
-                            
-                            <div id="review-form-container" class="mb-4">
-                                <h5>Deixe sua avaliação</h5>
-                                <form id="review-form">
-                                    <div class="mb-3">
-                                        <label for="booking-select" class="form-label">Selecione o atendimento</label>
-                                        <select class="form-select" id="booking-select" required>
-                                            <option value="">Selecione um atendimento concluído</option>
-                                        </select>
-                                    </div>
-                                    
-                                    <div class="mb-3">
-                                        <label class="form-label">Sua avaliação</label>
-                                        <div class="rating-input mb-2">
-                                            <i class="bi bi-star far fa-star"></i>
-                                            <i class="bi bi-star far fa-star"></i>
-                                            <i class="bi bi-star far fa-star"></i>
-                                            <i class="bi bi-star far fa-star"></i>
-                                            <i class="bi bi-star far fa-star"></i>
-                                        </div>
-                                        <input type="hidden" id="rating" required>
-                                    </div>
-                                    
-                                    <div class="mb-3">
-                                        <label for="comment" class="form-label">Comentário (opcional)</label>
-                                        <textarea class="form-control" id="comment" rows="3"></textarea>
-                                    </div>
-                                    
-                                    <button type="submit" class="btn btn-primary">Enviar Avaliação</button>
-                                </form>
-                            </div>
-                        </div>
-                        
-                        <div id="reviews-list">
-                            <!-- Avaliações serão carregadas dinamicamente -->
-                        </div>
-                    </div>
-                </div>
-            </div>
-            
-            <div class="col-lg-4">
-                <div class="card mb-4">
-                    <div class="card-body">
-                        <h5>Informações de Contato</h5>
-                        <ul class="list-unstyled">
-                            <li class="mb-2">
-                                <i class="bi bi-telephone me-2"></i>
-                                <span id="professional-phone">Telefone não disponível</span>
-                            </li>
-                            <li class="mb-2">
-                                <i class="bi bi-envelope me-2"></i>
-                                <span id="professional-email">Email não disponível</span>
-                            </li>
-                        </ul>
-                    </div>
-                </div>
-                
-                <div class="card">
-                    <div class="card-body">
-                        <h5>Endereço de Atendimento</h5>
-                        <p class="text-muted">O endereço do atendimento será definido por você no momento da reserva.</p>
-                        
-                        <div class="alert alert-info">
-                            <i class="bi bi-info-circle me-2"></i>
-                            O profissional se deslocará até o endereço informado para realizar o atendimento.
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
+<nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+  <div class="container-fluid">
+    <a class="navbar-brand" href="#">Saúde Connect</a>
+    <div class="collapse navbar-collapse">
+      <ul class="navbar-nav me-auto">
+        <li class="nav-item"><a class="nav-link" href="index.html">Início</a></li>
+        <li class="nav-item"><a class="nav-link" href="busca.html">Buscar</a></li>
+        <li class="nav-item"><a class="nav-link" href="login.html">Login</a></li>
+      </ul>
     </div>
+  </div>
+</nav>
 
-    <footer>
-        <div class="container">
-            <div class="row">
-                <div class="col-md-4 mb-4 mb-md-0">
-                    <h5>Saúde Connect</h5>
-                    <p>Conectando profissionais de saúde e pacientes de forma simples, segura e eficiente.</p>
-                </div>
-                <div class="col-md-4 mb-4 mb-md-0">
-                    <h5>Links Rápidos</h5>
-                    <ul class="list-unstyled footer-links">
-                        <li><a href="index.html">Início</a></li>
-                        <li><a href="busca.html">Buscar Profissionais</a></li>
-                        <li><a href="cadastro-paciente.html">Cadastro Paciente</a></li>
-                        <li><a href="cadastro-profissional.html">Cadastro Profissional</a></li>
-                    </ul>
-                </div>
-                <div class="col-md-4">
-                    <h5>Contato</h5>
-                    <ul class="list-unstyled footer-links">
-                        <li><a href="mailto:contato@saudeconnect.com">contato@saudeconnect.com</a></li>
-                        <li><a href="tel:+551199999999">(11) 9999-9999</a></li>
-                    </ul>
-                </div>
-            </div>
-            <hr class="mt-4 mb-3">
-            <div class="text-center">
-                <p class="mb-0">&copy; 2025 Saúde Connect. Todos os direitos reservados.</p>
-            </div>
-        </div>
-    </footer>
+<div class="container mt-5">
+    <h1>Avaliacao</h1>
+    <p>Conteúdo da página Avaliacao.</p>
+</div>
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="js/api.js"></script>
-    <script src="js/avaliacao.js"></script>
+<footer class="text-center mt-5 py-3 bg-light">© 2025 Saúde Connect</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
