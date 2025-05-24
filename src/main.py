@@ -12,7 +12,7 @@ from src.routes.admin import admin_bp
 from src.routes.search import search_bp
 from src.routes.booking import booking_bp
 
-app = Flask(__name__, static_folder=os.path.join(os.path.dirname(__file__), 'static'))
+app = Flask(__name__, static_folder=os.path.join(os.path.dirname(__file__), 'public'))
 app.config['SECRET_KEY'] = os.getenv('SECRET_KEY', 'asdf#FGSgvasgf$5$WGT')
 
 # Registrar blueprints
