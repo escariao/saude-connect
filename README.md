@@ -20,26 +20,26 @@ O **Saúde Connect** é uma plataforma para conectar **pacientes** e **profissio
 - HTML/CSS
 
 ## 📁 Estrutura de Diretórios
-saude-connect/
-├── src/
-│   ├── models/
-│   │   ├── user.py
-│   │   ├── patient.py
-│   │   ├── professional.py
-│   │   └── professional_activity.py
-│   ├── routes/
-│   │   ├── auth.py
-│   │   ├── patient.py
-│   │   ├── professional.py
-│   │   └── professional_activity.py
-│   └── main.py
-├── static/
-│   ├── js/
-│   │   └── activities.js
-│   └── activities.html
-├── tests/
-│   └── test_professional_activity.py
-└── README.md
+saude-connect/  
+├── src/  
+│   ├── models/  
+│   │   ├── user.py  
+│   │   ├── patient.py  
+│   │   ├── professional.py  
+│   │   └── professional_activity.py  
+│   ├── routes/  
+│   │   ├── auth.py  
+│   │   ├── patient.py  
+│   │   ├── professional.py  
+│   │   └── professional_activity.py  
+│   └── main.py  
+├── static/  
+│   ├── js/  
+│   │   └── activities.js  
+│   └── activities.html  
+├── tests/  
+│   └── test_professional_activity.py  
+└── README.md  
 
 ## ⚙️ Como rodar o backend
 1. Instale as dependências:
