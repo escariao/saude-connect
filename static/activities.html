@@ -1,0 +1,16 @@
+
+<h2>Cadastrar nova atividade</h2>
+<form onsubmit="criarAtividade(event)">
+    <input id="professional_id" placeholder="ID do profissional" required>
+    <input id="activity_name" placeholder="Nome da Atividade" required>
+    <input id="description" placeholder="Descrição">
+    <input id="price" placeholder="Preço" type="number" step="0.01">
+    <input id="availability" placeholder="Disponibilidade">
+    <button type="submit">Cadastrar</button>
+</form>
+
+<h2>Atividades cadastradas</h2>
+<ul id="lista-atividades"></ul>
+
+<script src="js/activities.js"></script>
+<script>listarAtividades();</script>
