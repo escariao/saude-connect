@@ -1,4 +1,6 @@
+
 from src.models.user import db
+from src.models.professional_activity import ProfessionalActivity
 from datetime import datetime
 
 class Professional(db.Model):
@@ -37,19 +39,3 @@ class Activity(db.Model):
     
     def __repr__(self):
         return f'<Activity {self.name}>'
-
-
-class ProfessionalActivity(db.Model):
-    __tablename__ = 'professional_activities'
-    
-    id = db.Column(db.Integer, primary_key=True)
-    professional_id = db.Column(db.Integer, db.ForeignKey('professionals.id'), nullable=False)
-    activity_id = db.Column(db.Integer, db.ForeignKey('activities.id'), nullable=False)
-    description = db.Column(db.Text, nullable=True)  # Descrição específica do profissional para esta atividade
-    experience_years = db.Column(db.Integer, nullable=True)
-    price = db.Column(db.Float, nullable=True)
-    created_at = db.Column(db.DateTime, default=datetime.utcnow)
-    updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
-    
-    def __repr__(self):
-        return f'<ProfessionalActivity {self.professional_id}:{self.activity_id}>'
