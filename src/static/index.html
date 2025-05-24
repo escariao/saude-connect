@@ -1,30 +1,64 @@
-
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Index</title>
+    <title>Saúde Connect - Início</title>
     <link rel="stylesheet" href="css/styles.css">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
 </head>
 <body>
-<header>
-    <h1>Saúde Connect</h1>
-    <nav>
-        <a href="index.html">Início</a> |
-        <a href="busca.html">Buscar</a> |
-        <a href="cadastro-paciente.html">Cadastrar Paciente</a> |
-        <a href="cadastro-profissional.html">Cadastrar Profissional</a>
-    </nav>
+
+<header class="mb-4">
+    <div class="container d-flex justify-content-between align-items-center">
+        <h1>Saúde Connect</h1>
+        <nav>
+            <a href="index.html">Início</a>
+            <a href="busca.html">Buscar Profissionais</a>
+            <a href="cadastro-paciente.html">Cadastrar Paciente</a>
+            <a href="cadastro-profissional.html">Cadastrar Profissional</a>
+            <a href="admin.html">Admin</a>
+            <a href="perfil-paciente.html">Meu Perfil</a>
+            <a href="login.html">Sair</a>
+        </nav>
+    </div>
 </header>
 
-<main>
-    <h2>Index</h2>
-    <p>Conteúdo da página Index conforme estilo padronizado.</p>
+<main class="container text-center">
+    <section class="py-5">
+        <h2 class="mb-4">Bem-vindo ao Saúde Connect</h2>
+        <p>Conectamos pacientes a profissionais de saúde com agilidade e confiança.</p>
+        <a class="btn" href="busca.html">Buscar Profissionais</a>
+    </section>
+
+    <section class="row py-5">
+        <div class="col-md-4">
+            <h3>Pacientes</h3>
+            <p>Encontre os melhores profissionais de saúde perto de você.</p>
+            <a class="btn" href="cadastro-paciente.html">Cadastrar-se</a>
+        </div>
+        <div class="col-md-4">
+            <h3>Profissionais</h3>
+            <p>Cadastre-se para oferecer seus serviços a milhares de pacientes.</p>
+            <a class="btn" href="cadastro-profissional.html">Cadastrar-se</a>
+        </div>
+        <div class="col-md-4">
+            <h3>Administração</h3>
+            <p>Acesse o painel administrativo para gerenciar o sistema.</p>
+            <a class="btn" href="admin.html">Admin</a>
+        </div>
+    </section>
 </main>
 
 <footer>
-    <p>&copy; 2025 Saúde Connect</p>
+    <div class="container">
+        <p>&copy; 2025 Saúde Connect. Todos os direitos reservados.</p>
+        <p>
+            <a href="mailto:contato@saudeconnect.com">contato@saudeconnect.com</a>
+        </p>
+    </div>
 </footer>
+
+<script src="js/api.js"></script>
 </body>
 </html>
