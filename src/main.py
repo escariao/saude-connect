@@ -7,6 +7,7 @@ from src.routes.patient import patient_bp
 from src.routes.professional import professional_bp
 from src.routes.search import search_bp
 from src.models.user import db
+from src.routes.professional_activity import activity_bp
 
 app = Flask(__name__, static_folder=os.path.join(os.path.dirname(__file__), 'static'))
 
@@ -22,3 +23,4 @@ app.register_blueprint(booking_bp, url_prefix='/api/booking')
 app.register_blueprint(patient_bp, url_prefix='/api/patient')
 app.register_blueprint(professional_bp, url_prefix='/api/professional')
 app.register_blueprint(search_bp, url_prefix='/api/search')
+app.register_blueprint(activity_bp, url_prefix='/api/activities')
