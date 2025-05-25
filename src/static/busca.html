@@ -1,30 +1,100 @@
-
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Busca</title>
-    <link rel="stylesheet" href="css/styles.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Busca - Saúde Connect</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css">
+  <style>
+    body {
+      background-color: #f8f9fa;
+    }
+    .search-result {
+      margin-bottom: 1rem;
+    }
+  </style>
 </head>
 <body>
-<header>
-    <h1>Saúde Connect</h1>
-    <nav>
-        <a href="index.html">Início</a> |
-        <a href="busca.html">Buscar</a> |
-        <a href="cadastro-paciente.html">Cadastrar Paciente</a> |
-        <a href="cadastro-profissional.html">Cadastrar Profissional</a>
-    </nav>
-</header>
 
-<main>
-    <h2>Busca</h2>
-    <p>Conteúdo da página Busca conforme estilo padronizado.</p>
+<nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+  <div class="container-fluid">
+    <a class="navbar-brand" href="index.html">Saúde Connect</a>
+    <div class="collapse navbar-collapse">
+      <ul class="navbar-nav ms-auto">
+        <li class="nav-item"><a class="nav-link" href="dashboard.html">Dashboard</a></li>
+        <li class="nav-item"><a class="nav-link" href="cadastro-paciente.html">Cadastrar Paciente</a></li>
+        <li class="nav-item"><a class="nav-link" href="cadastro-profissional.html">Cadastrar Profissional</a></li>
+        <li class="nav-item"><a class="nav-link" href="login.html">Sair</a></li>
+      </ul>
+    </div>
+  </div>
+</nav>
+
+<main class="container py-4">
+  <h1 class="mb-4">Buscar Profissionais</h1>
+
+  <form id="searchForm" class="mb-4">
+    <div class="mb-3">
+      <label for="category" class="form-label">Categoria</label>
+      <select id="category" class="form-select">
+        <option value="">Todas</option>
+        <option value="Fisioterapeuta">Fisioterapeuta</option>
+        <option value="Psicólogo">Psicólogo</option>
+        <option value="Nutricionista">Nutricionista</option>
+      </select>
+    </div>
+
+    <div class="mb-3">
+      <label for="name" class="form-label">Nome</label>
+      <input type="text" id="name" class="form-control" placeholder="Digite o nome">
+    </div>
+
+    <button type="submit" class="btn btn-primary">Buscar</button>
+  </form>
+
+  <div id="results">
+    <!-- Resultados de busca serão inseridos aqui -->
+  </div>
 </main>
 
-<footer>
-    <p>&copy; 2025 Saúde Connect</p>
+<footer class="bg-dark text-white text-center py-3 mt-4">
+  &copy; 2025 Saúde Connect
 </footer>
+
+<script>
+  document.getElementById('searchForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    const category = document.getElementById('category').value;
+    const name = document.getElementById('name').value;
+
+    // Simulação de busca
+    const results = [
+      { name: 'Dr. João Silva', category: 'Fisioterapeuta', phone: '1199999-9999' },
+      { name: 'Dra. Maria Souza', category: 'Psicólogo', phone: '1188888-8888' }
+    ].filter(p => (!category || p.category === category) && (!name || p.name.toLowerCase().includes(name.toLowerCase())));
+
+    const resultsContainer = document.getElementById('results');
+    resultsContainer.innerHTML = '';
+
+    if (results.length === 0) {
+      resultsContainer.innerHTML = '<div class="alert alert-warning">Nenhum profissional encontrado.</div>';
+      return;
+    }
+
+    results.forEach(p => {
+      const card = document.createElement('div');
+      card.className = 'card search-result';
+      card.innerHTML = `
+        <div class="card-body">
+          <h5 class="card-title">${p.name}</h5>
+          <p class="card-text">Categoria: ${p.category}</p>
+          <p class="card-text">Telefone: ${p.phone}</p>
+        </div>
+      `;
+      resultsContainer.appendChild(card);
+    });
+  });
+</script>
+
 </body>
 </html>
