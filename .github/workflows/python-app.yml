@@ -25,6 +25,7 @@ jobs:
         pip install -r requirements.txt
         pip install pytest
 
-    - name: Run tests
+    - name: Run tests with coverage
       run: |
-        pytest tests/
+        pytest --cov=src --cov-report=term-missing
+
