@@ -1,25 +1,27 @@
-# src/routes/booking.py
-
 from flask import Blueprint, request, jsonify
 from src.models.booking import Booking, db
+from src.utils.auth import token_required
 
 booking_bp = Blueprint('booking', __name__, url_prefix='/api/booking')
 
 @booking_bp.route('/', methods=['GET'])
+@token_required
 def list_bookings():
     bookings = Booking.query.all()
     return jsonify([b.serialize() for b in bookings]), 200
 
 @booking_bp.route('/<int:id>', methods=['GET'])
+@token_required
 def get_booking(id):
     booking = Booking.query.get_or_404(id)
     return jsonify(booking.serialize()), 200
 
 @booking_bp.route('/', methods=['POST'])
+@token_required
 def create_booking():
     data = request.json
     new_booking = Booking(
-        patient_id=data['patient_id'],
+        patient_id=request.user_id,  # Token protege e define quem é
         professional_id=data['professional_id'],
         scheduled_date=data['scheduled_date'],
         status=data.get('status', 'pending')
@@ -29,6 +31,7 @@ def create_booking():
     return jsonify(new_booking.serialize()), 201
 
 @booking_bp.route('/<int:id>', methods=['PUT'])
+@token_required
 def update_booking(id):
     booking = Booking.query.get_or_404(id)
     data = request.json
@@ -38,8 +41,9 @@ def update_booking(id):
     return jsonify(booking.serialize()), 200
 
 @booking_bp.route('/<int:id>', methods=['DELETE'])
+@token_required
 def delete_booking(id):
     booking = Booking.query.get_or_404(id)
     db.session.delete(booking)
     db.session.commit()
-    return jsonify({'message': 'Booking deleted'}), 200
+    return jsonify({'message': 'Booking deletado'}), 200
