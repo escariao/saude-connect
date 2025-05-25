@@ -3,17 +3,18 @@ from src.models.user import db
 from src.models.patient import Patient
 from src.utils.auth import token_required
 
-patient_bp = Blueprint('patient', __name__)
-
+patient_bp = Blueprint('patient', __name__, url_prefix='/api/patient')
 
 @patient_bp.route('/', methods=['POST'])
 @token_required
 def create_patient():
-    """Criar perfil de paciente vinculado ao usuário autenticado."""
     try:
         data = request.get_json()
-        if 'phone' not in data:
-            return jsonify({'error': 'phone is required'}), 400
+
+        required_fields = ['phone']
+        for field in required_fields:
+            if field not in data:
+                return jsonify({'error': f'{field} é obrigatório'}), 400
 
         patient = Patient(
             user_id=request.user_id,
@@ -26,16 +27,15 @@ def create_patient():
         )
         db.session.add(patient)
         db.session.commit()
-        return jsonify({'message': 'Paciente criado com sucesso', 'id': patient.id}), 201
-    except Exception:
-        db.session.rollback()
-        return jsonify({'error': 'Erro interno ao criar paciente'}), 500
 
+        return jsonify({'message': 'Paciente criado com sucesso!', 'id': patient.id}), 201
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({'error': f'Erro ao criar paciente: {str(e)}'}), 500
 
 @patient_bp.route('/<int:user_id>', methods=['GET'])
 @token_required
 def get_patient(user_id):
-    """Obter informações do paciente vinculado ao usuário autenticado."""
     try:
         if request.user_id != user_id:
             return jsonify({'error': 'Acesso não autorizado'}), 403
@@ -53,7 +53,7 @@ def get_patient(user_id):
             'city': patient.city,
             'state': patient.state
         }
+
         return jsonify(result), 200
-    except Exception:
-        db.session.rollback()
-        return jsonify({'error': 'Erro interno ao buscar paciente'}), 500
+    except Exception as e:
+        return jsonify({'error': f'Erro ao buscar paciente: {str(e)}'}), 500
