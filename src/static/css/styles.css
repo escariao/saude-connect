@@ -1,122 +1,77 @@
 /* Reset básico */
 * {
-    box-sizing: border-box;
-    margin: 0;
-    padding: 0;
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
 }
 
-/* Layout principal */
+/* Corpo */
 body {
-    font-family: Arial, sans-serif;
-    background-color: #f8f9fa;
-    color: #212529;
-    line-height: 1.6;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background-color: #f5f7fa;
+  color: #212529;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
 }
 
 /* Navbar */
-header {
-    background-color: #007bff;
-    padding: 1rem;
-    color: #fff;
+.navbar-brand {
+  font-weight: 700;
+  font-size: 1.6rem;
 }
 
-header h1 {
-    font-size: 1.8rem;
+/* Botão primário */
+.btn-primary {
+  background-color: #0d6efd;
+  border-color: #0d6efd;
+  transition: background-color 0.3s ease;
 }
 
-header nav a {
-    color: #fff;
-    margin-right: 1rem;
-    text-decoration: none;
-    font-weight: bold;
+.btn-primary:hover {
+  background-color: #0b5ed7;
+  border-color: #0a58ca;
 }
 
-header nav a:hover {
-    text-decoration: underline;
+/* Container main */
+main.container {
+  flex-grow: 1;
+  margin-top: 2rem;
+  margin-bottom: 2rem;
+  padding: 1.5rem;
+  background: #fff;
+  border-radius: 8px;
+  box-shadow: 0 0 14px rgba(0, 0, 0, 0.1);
 }
 
-/* Container principal */
-main {
-    max-width: 1200px;
-    margin: 2rem auto;
-    padding: 1rem;
-    background: #fff;
-    border-radius: 8px;
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-}
-
-/* Botões padrão */
-.btn {
-    display: inline-block;
-    padding: 0.6rem 1.2rem;
-    margin-top: 1rem;
-    background-color: #007bff;
-    color: #fff;
-    border-radius: 4px;
-    text-decoration: none;
-    transition: background 0.3s ease;
-}
-
-.btn:hover {
-    background-color: #0056b3;
-}
-
-/* Formulários */
-form input, form select, form textarea {
-    width: 100%;
-    padding: 0.5rem;
-    margin: 0.6rem 0;
-    border: 1px solid #ccc;
-    border-radius: 4px;
-}
-
-form button {
-    cursor: pointer;
+/* Footer */
+footer {
+  background-color: #212529;
+  color: #f8f9fa;
+  padding: 1.5rem 0;
+  text-align: center;
+  margin-top: auto;
+  font-size: 0.9rem;
 }
 
 /* Alertas */
 .alert {
+  margin-top: 1rem;
+}
+
+/* Formulário */
+form input:invalid {
+  border-color: #dc3545;
+}
+
+form input:valid {
+  border-color: #198754;
+}
+
+/* Pequenas melhorias responsivas */
+@media (max-width: 576px) {
+  main.container {
+    margin: 1rem;
     padding: 1rem;
-    margin: 1rem 0;
-    border-radius: 4px;
-}
-
-.alert-success {
-    background-color: #d4edda;
-    color: #155724;
-}
-
-.alert-error {
-    background-color: #f8d7da;
-    color: #721c24;
-}
-
-/* Rodapé */
-footer {
-    background-color: #343a40;
-    color: #fff;
-    padding: 1.5rem;
-    text-align: center;
-    margin-top: 2rem;
-}
-
-footer a {
-    color: #ffc107;
-    text-decoration: none;
-}
-
-footer a:hover {
-    text-decoration: underline;
-}
-
-/* Responsividade */
-@media (max-width: 768px) {
-    header h1 {
-        font-size: 1.5rem;
-    }
-
-    main {
-        margin: 1rem;
-        padding: 1rem;
-    }
+  }
 }
