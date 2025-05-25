@@ -4,7 +4,7 @@ from src.routes.booking import booking_bp
 from src.routes.patient import patient_bp
 from src.routes.professional import professional_bp
 from src.routes.search import search_bp
-from src.routes.professional_activity import activity_bp
+from src.routes.professional_activity import professional_activity_bp
 from src.models.user import db
 import os
 
@@ -27,9 +27,9 @@ def index():
 app.register_blueprint(auth_bp, url_prefix='/api/auth')
 app.register_blueprint(booking_bp, url_prefix='/api/booking')
 app.register_blueprint(patient_bp, url_prefix='/api/patient')
-app.register_blueprint(professional_bp, url_prefix='/api/professional')
+app.register_blueprint(professional_activity_bp, url_prefix='/api/professional_activity')
 app.register_blueprint(search_bp, url_prefix='/api/search')
-app.register_blueprint(activity_bp, url_prefix='/api/activities')
+
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=int(os.environ.get('PORT', 5000)))
