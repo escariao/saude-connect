@@ -4,22 +4,28 @@ from src.utils.auth import token_required
 
 professional_activity_bp = Blueprint('professional_activity', __name__, url_prefix='/api/professional_activity')
 
+
 @professional_activity_bp.route('/', methods=['GET'])
 def list_professional_activities():
+    """Listar todas as atividades profissionais."""
     activities = ProfessionalActivity.query.all()
     return jsonify([a.serialize() for a in activities]), 200
 
+
 @professional_activity_bp.route('/<int:id>', methods=['GET'])
 def get_professional_activity(id):
+    """Consultar uma atividade profissional específica pelo ID."""
     activity = ProfessionalActivity.query.get_or_404(id)
     return jsonify(activity.serialize()), 200
+
 
 @professional_activity_bp.route('/', methods=['POST'])
 @token_required
 def create_professional_activity():
+    """Criar uma nova atividade profissional."""
     data = request.json
     new_activity = ProfessionalActivity(
-        professional_id=request.user_id,  # Definido pelo token
+        professional_id=request.user_id,
         name=data['name'],
         description=data.get('description', ''),
         price=data['price'],
