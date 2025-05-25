@@ -8,7 +8,7 @@ class ProfessionalActivity(db.Model):
     activity_name = db.Column(db.String(100), nullable=False)
     description = db.Column(db.String(255))
     price = db.Column(db.Float)
-    availability = db.Column(db.String(255))  # Pode ser string ou JSON dependendo do uso
+    availability = db.Column(db.String(255))  # Pode ser melhorado no futuro para JSON se necessário
 
     def serialize(self):
         return {
