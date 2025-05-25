@@ -1,30 +1,64 @@
 from flask import Blueprint, request, jsonify
-from src.models.user import db
-from src.models.professional import Professional
+from src.models.professional import Professional, db
+from src.utils.auth import token_required
 
-professional_bp = Blueprint('professional', __name__)
+professional_bp = Blueprint('professional', __name__, url_prefix='/api/professional')
 
-@professional_bp.route('/', methods=['POST'])
-def create_professional():
+@professional_bp.route('/', methods=['GET'])
+@token_required
+def list_professionals():
     try:
-        data = request.get_json()
-        required_fields = ['user_id', 'category_id']
-        for field in required_fields:
-            if field not in data:
-                return jsonify({'error': f'{field} is required'}), 400
+        professionals = Professional.query.all()
+        return jsonify([{
+            'id': prof.id,
+            'user_id': prof.user_id,
+            'document_number': prof.document_number,
+            'bio': prof.bio,
+            'approval_status': prof.approval_status
+        } for prof in professionals]), 200
+    except Exception as e:
+        return jsonify({'error': f'Erro ao listar profissionais: {str(e)}'}), 500
 
-        professional = Professional(
-            user_id=data['user_id'],
-            category_id=data['category_id'],
-            curriculum_file=data.get('curriculum_file'),
-            phone=data.get('phone'),
-            document=data.get('document')
-        )
+@professional_bp.route('/<int:professional_id>', methods=['GET'])
+@token_required
+def get_professional(professional_id):
+    try:
+        prof = Professional.query.get_or_404(professional_id)
+        result = {
+            'id': prof.id,
+            'user_id': prof.user_id,
+            'document_number': prof.document_number,
+            'bio': prof.bio,
+            'approval_status': prof.approval_status
+        }
+        return jsonify(result), 200
+    except Exception as e:
+        return jsonify({'error': f'Erro ao buscar profissional: {str(e)}'}), 500
 
-        db.session.add(professional)
+@professional_bp.route('/<int:professional_id>', methods=['PUT'])
+@token_required
+def update_professional(professional_id):
+    try:
+        prof = Professional.query.get_or_404(professional_id)
+        data = request.json
+
+        prof.bio = data.get('bio', prof.bio)
+        prof.approval_status = data.get('approval_status', prof.approval_status)
+
         db.session.commit()
-
-        return jsonify({'message': 'Professional created', 'id': professional.id}), 201
+        return jsonify({'message': 'Profissional atualizado com sucesso!'}), 200
     except Exception as e:
         db.session.rollback()
-        return jsonify({'error': str(e)}), 500
+        return jsonify({'error': f'Erro ao atualizar profissional: {str(e)}'}), 500
+
+@professional_bp.route('/<int:professional_id>', methods=['DELETE'])
+@token_required
+def delete_professional(professional_id):
+    try:
+        prof = Professional.query.get_or_404(professional_id)
+        db.session.delete(prof)
+        db.session.commit()
+        return jsonify({'message': 'Profissional excluído com sucesso!'}), 200
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({'error': f'Erro ao excluir profissional: {str(e)}'}), 500
