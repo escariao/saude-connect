@@ -1,7 +1,6 @@
-# src/routes/professional_activity.py
-
 from flask import Blueprint, request, jsonify
 from src.models.professional_activity import ProfessionalActivity, db
+from src.utils.auth import token_required
 
 professional_activity_bp = Blueprint('professional_activity', __name__, url_prefix='/api/professional_activity')
 
@@ -16,10 +15,11 @@ def get_professional_activity(id):
     return jsonify(activity.serialize()), 200
 
 @professional_activity_bp.route('/', methods=['POST'])
+@token_required
 def create_professional_activity():
     data = request.json
     new_activity = ProfessionalActivity(
-        professional_id=data['professional_id'],
+        professional_id=request.user_id,  # Definido pelo token
         name=data['name'],
         description=data.get('description', ''),
         price=data['price'],
