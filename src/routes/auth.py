@@ -15,14 +15,11 @@ UPLOAD_FOLDER = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'public
 ALLOWED_EXTENSIONS = {'pdf', 'png', 'jpg', 'jpeg'}
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 
-
 def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
-
 def validate_email(email):
     return re.match(r"[^@]+@[^@]+\.[^@]+", email)
-
 
 @auth_bp.route('/login', methods=['POST'])
 def login():
@@ -55,7 +52,6 @@ def login():
     except Exception:
         return jsonify({'message': 'Erro interno ao realizar login.'}), 500
 
-
 @auth_bp.route('/register/professional', methods=['POST'])
 def register_professional():
     try:
@@ -63,7 +59,6 @@ def register_professional():
             return jsonify({'error': 'Dados de formulário não encontrados'}), 400
 
         data = request.form.to_dict()
-
         required_fields = ['email', 'password', 'name', 'document']
         for field in required_fields:
             if not data.get(field):
@@ -143,7 +138,6 @@ def register_professional():
         db.session.rollback()
         return jsonify({'error': 'Erro interno ao cadastrar profissional.'}), 500
 
-
 @auth_bp.route('/register/patient', methods=['POST'])
 def register_patient():
     try:
@@ -205,7 +199,6 @@ def register_patient():
     except Exception:
         db.session.rollback()
         return jsonify({'error': 'Erro interno ao cadastrar paciente.'}), 500
-
 
 @auth_bp.route('/activities', methods=['GET'])
 def get_activities():
