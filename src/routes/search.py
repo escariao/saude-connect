@@ -1,24 +1,15 @@
 from flask import Blueprint, request, jsonify
 from sqlalchemy import exc
-from src.models.user import db, User
+from src.models.user import User, db
 from src.models.professional import Professional, Activity, ProfessionalActivity
 from src.models.category import Category
 from src.utils.auth import token_required
 
-search_bp = Blueprint('search', __name__)
-
-FIXED_CATEGORIES = [
-    "Acupunturista", "Auxiliar de Saúde Bucal", "Cuidador", "Dentista", "Doula",
-    "Educador Físico", "Enfermeiro", "Farmacêutico Clínico", "Fisioterapeuta", "Fonoaudiólogo",
-    "Maqueiro", "Massoterapeuta", "Nutricionista", "Podólogo", "Psicólogo", "Técnico de Enfermagem",
-    "Técnico em Análises Clínicas", "Técnico em Radiologia", "Terapeuta Ocupacional"
-]
-
+search_bp = Blueprint('search', __name__, url_prefix='/api/search')
 
 @search_bp.route('/professionals', methods=['GET'])
 @token_required
 def search_professionals():
-    """Buscar profissionais com filtros opcionais."""
     try:
         activity_id = request.args.get('activity_id')
         category = request.args.get('category')
@@ -33,57 +24,55 @@ def search_professionals():
             query = query.join(ProfessionalActivity).join(Activity).join(Category).filter(Category.name == category)
 
         professionals = query.all()
-        result = []
 
+        result = []
         for prof in professionals:
             user = User.query.get(prof.user_id)
-            if user:
-                if name and name.lower() not in user.name.lower():
-                    continue
+            if not user:
+                continue
 
-                activities_data = []
-                for pa in prof.activities:
-                    activity_data = {
-                        'id': pa.id,
-                        'activity_name': getattr(pa, 'activity_name', 'Atividade não especificada'),
-                        'description': getattr(pa, 'description', ''),
-                        'experience_years': getattr(pa, 'experience_years', 0),
-                        'price': getattr(pa, 'price', 0)
-                    }
+            if name and name.lower() not in user.name.lower():
+                continue
 
-                    if getattr(pa, 'activity_id', None):
-                        activity = Activity.query.get(pa.activity_id)
-                        if activity:
-                            activity_data['activity_id'] = activity.id
-                            activity_data['activity_name'] = activity.name
-                            if getattr(activity, 'category_id', None):
-                                category_obj = Category.query.get(activity.category_id)
-                                if category_obj:
-                                    activity_data['category'] = category_obj.name
-
-                    activities_data.append(activity_data)
-
-                prof_data = {
-                    'id': prof.id,
-                    'user_id': prof.user_id,
-                    'name': user.name,
-                    'phone': user.phone,
-                    'bio': getattr(prof, 'bio', ''),
-                    'activities': activities_data
+            activities_data = []
+            for pa in prof.activities:
+                activity_data = {
+                    'id': pa.id,
+                    'activity_name': pa.activity_name or 'Atividade não especificada',
+                    'description': pa.description or '',
+                    'experience_years': pa.experience_years or 0,
+                    'price': pa.price or 0
                 }
-                result.append(prof_data)
+                if pa.activity_id:
+                    activity = Activity.query.get(pa.activity_id)
+                    if activity:
+                        activity_data.update({
+                            'activity_id': activity.id,
+                            'activity_name': activity.name
+                        })
+                        if activity.category_id:
+                            category_obj = Category.query.get(activity.category_id)
+                            if category_obj:
+                                activity_data['category'] = category_obj.name
+                activities_data.append(activity_data)
+
+            prof_data = {
+                'id': prof.id,
+                'user_id': prof.user_id,
+                'name': user.name,
+                'phone': user.phone,
+                'bio': prof.bio,
+                'activities': activities_data
+            }
+            result.append(prof_data)
 
         return jsonify(result), 200
-
     except Exception as e:
-        print(f"Erro ao buscar profissionais: {e}")
-        return jsonify([]), 200
-
+        return jsonify({'error': f'Erro ao buscar profissionais: {str(e)}'}), 500
 
 @search_bp.route('/activities', methods=['GET'])
 @token_required
 def get_activities():
-    """Buscar todas as atividades disponíveis."""
     try:
         inspector = db.inspect(db.engine)
         if 'activities' not in inspector.get_table_names():
@@ -91,88 +80,78 @@ def get_activities():
 
         activities = Activity.query.all()
         result = []
-
         for activity in activities:
             category_name = None
-            if getattr(activity, 'category_id', None):
-                category_obj = Category.query.get(activity.category_id)
-                if category_obj:
-                    category_name = category_obj.name
+            if activity.category_id:
+                category = Category.query.get(activity.category_id)
+                if category:
+                    category_name = category.name
 
             activity_data = {
                 'id': activity.id,
                 'name': activity.name,
-                'description': getattr(activity, 'description', ''),
-                'category_id': getattr(activity, 'category_id', None),
+                'description': activity.description or '',
+                'category_id': activity.category_id,
                 'category': category_name
             }
             result.append(activity_data)
 
         return jsonify(result), 200
-
     except exc.SQLAlchemyError as db_error:
-        print(f"Erro de banco de dados ao buscar atividades: {db_error}")
-        return jsonify([]), 200
+        return jsonify({'error': f'Erro de banco de dados: {str(db_error)}'}), 500
     except Exception as e:
-        print(f"Erro ao buscar atividades: {e}")
-        return jsonify([]), 200
-
+        return jsonify({'error': f'Erro ao buscar atividades: {str(e)}'}), 500
 
 @search_bp.route('/categories', methods=['GET'])
 @token_required
 def get_categories():
-    """Buscar todas as categorias fixas."""
     try:
-        categories = [{
-            'id': i,
-            'name': category_name,
-            'description': f'Profissionais da área de {category_name}'
-        } for i, category_name in enumerate(FIXED_CATEGORIES, 1)]
+        FIXED_CATEGORIES = [
+            "Acupunturista", "Auxiliar de Saúde Bucal", "Cuidador", "Dentista", "Doula",
+            "Educador Físico", "Enfermeiro", "Farmacêutico Clínico", "Fisioterapeuta", "Fonoaudiólogo",
+            "Maqueiro", "Massoterapeuta", "Nutricionista", "Podólogo", "Psicólogo", "Técnico de Enfermagem",
+            "Técnico em Análises Clínicas", "Técnico em Radiologia", "Terapeuta Ocupacional"
+        ]
+
+        categories = [{'id': i + 1, 'name': cat, 'description': f'Profissionais da área de {cat}'} 
+                      for i, cat in enumerate(FIXED_CATEGORIES)]
 
         return jsonify(categories), 200
-
     except Exception as e:
-        print(f"Erro ao buscar categorias: {e}")
-        return jsonify([{
-            'id': i,
-            'name': category_name,
-            'description': f'Profissionais da área de {category_name}'
-        } for i, category_name in enumerate(FIXED_CATEGORIES, 1)]), 200
-
+        return jsonify({'error': f'Erro ao buscar categorias: {str(e)}'}), 500
 
 @search_bp.route('/professional/<int:professional_id>', methods=['GET'])
 @token_required
 def get_professional_details(professional_id):
-    """Buscar detalhes de um profissional específico."""
     try:
         prof = Professional.query.get(professional_id)
         if not prof:
-            return jsonify({'message': 'Profissional não encontrado'}), 404
+            return jsonify({'error': 'Profissional não encontrado'}), 404
 
         user = User.query.get(prof.user_id)
         if not user:
-            return jsonify({'message': 'Usuário não encontrado'}), 404
+            return jsonify({'error': 'Usuário não encontrado'}), 404
 
         activities_data = []
         for pa in prof.activities:
             activity_data = {
                 'id': pa.id,
-                'activity_name': getattr(pa, 'activity_name', 'Atividade não especificada'),
-                'description': getattr(pa, 'description', ''),
-                'experience_years': getattr(pa, 'experience_years', 0),
-                'price': getattr(pa, 'price', 0)
+                'activity_name': pa.activity_name or 'Atividade não especificada',
+                'description': pa.description or '',
+                'experience_years': pa.experience_years or 0,
+                'price': pa.price or 0
             }
-
-            if getattr(pa, 'activity_id', None):
+            if pa.activity_id:
                 activity = Activity.query.get(pa.activity_id)
                 if activity:
-                    activity_data['activity_id'] = activity.id
-                    activity_data['activity_name'] = activity.name
-                    if getattr(activity, 'category_id', None):
-                        category_obj = Category.query.get(activity.category_id)
-                        if category_obj:
-                            activity_data['category'] = category_obj.name
-
+                    activity_data.update({
+                        'activity_id': activity.id,
+                        'activity_name': activity.name
+                    })
+                    if activity.category_id:
+                        category = Category.query.get(activity.category_id)
+                        if category:
+                            activity_data['category'] = category.name
             activities_data.append(activity_data)
 
         prof_data = {
@@ -181,11 +160,9 @@ def get_professional_details(professional_id):
             'name': user.name,
             'email': user.email,
             'phone': user.phone,
-            'bio': getattr(prof, 'bio', ''),
+            'bio': prof.bio,
             'activities': activities_data
         }
-
         return jsonify(prof_data), 200
-
-    except Exception:
-        return jsonify({'message': 'Erro ao buscar detalhes do profissional. Tente novamente mais tarde.'}), 500
+    except Exception as e:
+        return jsonify({'error': f'Erro ao buscar detalhes do profissional: {str(e)}'}), 500
