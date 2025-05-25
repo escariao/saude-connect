@@ -1,5 +1,5 @@
 import os
-from flask import Flask
+from flask import Flask, send_from_directory
 from src.models.user import db
 from src.routes.auth import auth_bp
 from src.routes.booking import booking_bp
@@ -27,6 +27,12 @@ with app.app_context():
 def index():
     return app.send_static_file('index.html')
 
+# Rota para servir arquivos estáticos direto da pasta static/
+@app.route('/<path:filename>')
+def serve_static(filename):
+    static_folder = os.path.join(os.path.dirname(__file__), 'static')
+    return send_from_directory(static_folder, filename)
+
 # Registro de Blueprints
 app.register_blueprint(auth_bp, url_prefix='/api/auth')
 app.register_blueprint(booking_bp, url_prefix='/api/booking')
@@ -34,7 +40,7 @@ app.register_blueprint(patient_bp, url_prefix='/api/patient')
 app.register_blueprint(professional_bp, url_prefix='/api/professional')
 app.register_blueprint(professional_activity_bp, url_prefix='/api/professional_activity')
 app.register_blueprint(search_bp, url_prefix='/api/search')
-app.register_blueprint(user_bp, url_prefix='/api/user')  # Agora está registrado!
+app.register_blueprint(user_bp, url_prefix='/api/user')
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=int(os.environ.get('PORT', 5000)))
