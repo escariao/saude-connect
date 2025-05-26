@@ -5,54 +5,47 @@ from ..utils.auth import token_required # Changed to relative import
 professional_activity_bp = Blueprint('professional_activity', __name__, url_prefix='/api/professional_activity')
 
 @professional_activity_bp.route('/', methods=['GET'])
-def list_professional_activities():
+def list_professional_activities(): # Removed @token_required
     try:
         activities = ProfessionalActivity.query.all()
-        return jsonify([{
-            'id': a.id,
-            'professional_id': a.professional_id,
-            'activity_name': a.activity_name,
-            'description': a.description,
-            'experience_years': a.experience_years,
-            'price': a.price
-        } for a in activities]), 200
+        return jsonify([a.serialize() for a in activities]), 200 # Use serialize()
     except Exception as e:
+        # Consider logging the exception e for debugging
         return jsonify({'error': f'Erro ao listar atividades profissionais: {str(e)}'}), 500
 
 @professional_activity_bp.route('/<int:id>', methods=['GET'])
-def get_professional_activity(id):
+def get_professional_activity(id): # Removed @token_required
     try:
         activity = ProfessionalActivity.query.get_or_404(id)
-        result = {
-            'id': activity.id,
-            'professional_id': activity.professional_id,
-            'activity_name': activity.activity_name,
-            'description': activity.description,
-            'experience_years': activity.experience_years,
-            'price': activity.price
-        }
-        return jsonify(result), 200
+        return jsonify(activity.serialize()), 200 # Use serialize()
     except Exception as e:
-        return jsonify({'error': f'Erro ao buscar atividade: {str(e)}'}), 500
+        # Consider logging the exception e for debugging
+        return jsonify({'error': f'Erro ao buscar atividade profissional: {str(e)}'}), 500
 
 @professional_activity_bp.route('/', methods=['POST'])
 @token_required
 def create_professional_activity():
     try:
         data = request.json
+        # Ensure 'activity_id' is provided in the request
+        if 'activity_id' not in data:
+            return jsonify({'error': 'activity_id is required'}), 400
+
         new_activity = ProfessionalActivity(
-            professional_id=request.user_id,  # assume que o user é profissional
-            activity_name=data['activity_name'],
+            professional_id=request.user_id,
+            activity_id=data['activity_id'], # Use activity_id
             description=data.get('description', ''),
-            experience_years=data.get('experience_years', 0),
-            price=data.get('price', 0)
+            price=data.get('price', 0.0), # Ensure float if model expects float
+            availability=data.get('availability') # Added based on model's serialize method
         )
         db.session.add(new_activity)
         db.session.commit()
-        return jsonify({'message': 'Atividade criada com sucesso!', 'id': new_activity.id}), 201
+        # Use the model's serialize method for consistency
+        return jsonify(new_activity.serialize()), 201 
     except Exception as e:
         db.session.rollback()
-        return jsonify({'error': f'Erro ao criar atividade: {str(e)}'}), 500
+        # Consider logging the exception e for debugging
+        return jsonify({'error': f'Erro ao criar atividade profissional: {str(e)}'}), 500
 
 @professional_activity_bp.route('/<int:id>', methods=['PUT'])
 @token_required
@@ -61,16 +54,17 @@ def update_professional_activity(id):
         activity = ProfessionalActivity.query.get_or_404(id)
         data = request.json
 
-        activity.activity_name = data.get('activity_name', activity.activity_name)
+        # activity.activity_id = data.get('activity_id', activity.activity_id) # FKs usually not changed
         activity.description = data.get('description', activity.description)
-        activity.experience_years = data.get('experience_years', activity.experience_years)
         activity.price = data.get('price', activity.price)
+        activity.availability = data.get('availability', activity.availability)
 
         db.session.commit()
-        return jsonify({'message': 'Atividade atualizada com sucesso!'}), 200
+        return jsonify(activity.serialize()), 200 # Use serialize()
     except Exception as e:
         db.session.rollback()
-        return jsonify({'error': f'Erro ao atualizar atividade: {str(e)}'}), 500
+        # Consider logging the exception e for debugging
+        return jsonify({'error': f'Erro ao atualizar atividade profissional: {str(e)}'}), 500
 
 @professional_activity_bp.route('/<int:id>', methods=['DELETE'])
 @token_required

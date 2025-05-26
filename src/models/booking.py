@@ -15,3 +15,14 @@ class Booking(db.Model):
     
     def __repr__(self):
         return f'<Booking {self.id} - {self.status}>'
+
+    def serialize(self):
+        return {
+            'id': self.id,
+            'patient_id': self.patient_id,
+            'professional_id': self.professional_id,
+            'date_time': self.date_time.isoformat() if self.date_time else None,
+            'status': self.status,
+            'created_at': self.created_at.isoformat() if self.created_at else None,
+            'updated_at': self.updated_at.isoformat() if self.updated_at else None
+        }

@@ -46,6 +46,7 @@ def get_patient(user_id):
 
         result = {
             'id': patient.id,
+            'user_id': patient.user_id, # Added user_id
             'phone': patient.phone,
             'document': patient.document,
             'birth_date': patient.birth_date.isoformat() if patient.birth_date else None,
