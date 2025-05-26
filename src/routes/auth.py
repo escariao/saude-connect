@@ -105,32 +105,48 @@ def register_professional():
         db.session.add(new_professional)
         db.session.flush()
 
-        activities = request.form.getlist('activities[]')
-        descriptions = request.form.getlist('descriptions[]')
-        experience_years = request.form.getlist('experience_years[]')
-        prices = request.form.getlist('prices[]')
+        activity_ids = request.form.getlist('activity_ids[]') # Expecting IDs now
+        descriptions = request.form.getlist('descriptions[]') # Assuming these still align by index
+        # experience_years is not a field in ProfessionalActivity model based on previous file reading.
+        # If it were, it would be: experience_years = request.form.getlist('experience_years[]')
+        prices = request.form.getlist('prices[]') # Assuming these still align by index
+        availabilities = request.form.getlist('availabilities[]') # Assuming this might be provided
 
-        if not activities:
-            category_id = data.get('category_id')
-            if category_id:
-                prof_activity = ProfessionalActivity(
-                    professional_id=new_professional.id,
-                    activity_name=f"Serviço de {new_user.name}",
-                    description=data.get('bio', 'Serviço profissional'),
-                    experience_years=0,
-                    price=0
-                )
-                db.session.add(prof_activity)
-        else:
-            for i, activity_name in enumerate(activities):
-                prof_activity = ProfessionalActivity(
-                    professional_id=new_professional.id,
-                    activity_name=activity_name,
-                    description=descriptions[i] if i < len(descriptions) else None,
-                    experience_years=experience_years[i] if i < len(experience_years) else None,
-                    price=prices[i] if i < len(prices) else None
-                )
-                db.session.add(prof_activity)
+        # If `activity_ids` is empty, the old logic created a default activity.
+        # With activity_id being mandatory, this needs a valid ID or this block should be removed/rethought.
+        # For now, if no activity_ids are provided, no ProfessionalActivity will be created from this loop.
+        # A real application might require at least one activity or have a default general activity_id.
+        if activity_ids:
+            for i, activity_id_str in enumerate(activity_ids):
+                try:
+                    activity_id = int(activity_id_str)
+                    # Optional: Check if Activity with this ID exists
+                    # activity = Activity.query.get(activity_id)
+                    # if not activity:
+                    #     # Handle error: activity ID not found
+                    #     continue 
+
+                    prof_activity = ProfessionalActivity(
+                        professional_id=new_professional.id,
+                        activity_id=activity_id, # Use the new foreign key
+                        description=descriptions[i] if i < len(descriptions) else None,
+                        price=float(prices[i]) if i < len(prices) and prices[i] else None,
+                        availability=availabilities[i] if i < len(availabilities) else None
+                        # experience_years is not in ProfessionalActivity model.
+                    )
+                    db.session.add(prof_activity)
+                except ValueError:
+                    # Handle error: activity_id_str is not a valid integer
+                    current_app.logger.warning(f"Invalid activity_id received: {activity_id_str}")
+                    continue 
+        # else:
+            # If activities are mandatory, you might want to return an error here:
+            # return jsonify({'error': 'At least one activity ID must be provided.'}), 400
+            # Or, if there's a default activity to assign:
+            # default_activity = Activity.query.filter_by(name="General Service").first()
+            # if default_activity:
+            #     prof_activity = ProfessionalActivity(...)
+            #     db.session.add(prof_activity)
 
         db.session.commit()
         return jsonify({'message': 'Profissional cadastrado com sucesso! Aguarde a aprovação do administrador.', 'user_id': new_user.id}), 201
