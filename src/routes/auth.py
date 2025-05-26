@@ -51,7 +51,7 @@ def login():
         return jsonify({'message': f'Erro no login: {str(e)}'}), 500
 
 # Configuração para upload de arquivos
-UPLOAD_FOLDER = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'public', 'uploads')
+UPLOAD_FOLDER = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'static', 'uploads')
 ALLOWED_EXTENSIONS = {'pdf', 'png', 'jpg', 'jpeg'}
 
 # Criar diretório de uploads se não existir
@@ -125,39 +125,64 @@ def register_professional():
         db.session.add(new_professional)
         db.session.flush()  # Para obter o ID do profissional
         
-        # Processar atividades
-        activities = request.form.getlist('activities[]')
-        descriptions = request.form.getlist('descriptions[]')
-        experience_years = request.form.getlist('experience_years[]')
-        prices = request.form.getlist('prices[]')
+        # Processar atividades selecionadas pelo profissional
+        activity_ids = request.form.getlist('activity_ids[]')
+        activity_descriptions = request.form.getlist('activity_descriptions[]')
+        activity_prices = request.form.getlist('activity_prices[]')
+        # availability = request.form.getlist('activity_availabilities[]') # Assuming availability is also per activity
+        # experience_years = request.form.getlist('activity_experience_years[]') # Assuming experience is also per activity
+
+        if activity_ids:
+            for i, activity_id_str in enumerate(activity_ids):
+                try:
+                    activity_id = int(activity_id_str)
+                    activity = Activity.query.get(activity_id)
+                    if not activity:
+                        # Opção: Logar um aviso, ignorar, ou retornar erro
+                        # Para este exemplo, vamos ignorar atividades inválidas silenciosamente,
+                        # mas em produção, um erro ou log seria melhor.
+                        current_app.logger.warn(f"Tentativa de registrar atividade com ID inválido: {activity_id_str}")
+                        continue
+
+                    # Coletar detalhes específicos da atividade para este profissional
+                    description = activity_descriptions[i] if i < len(activity_descriptions) else None
+                    price_str = activity_prices[i] if i < len(activity_prices) else None
+                    # availability_str = availability[i] if i < len(availability) else None
+                    # experience_str = experience_years[i] if i < len(experience_years) else None
+                    
+                    price = None
+                    if price_str:
+                        try:
+                            price = float(price_str)
+                        except ValueError:
+                            # Logar erro de conversão de preço
+                            current_app.logger.warn(f"Valor de preço inválido para atividade {activity_id}: {price_str}")
+                            # Decidir se deve continuar ou retornar erro
+                    
+                    # experience = None
+                    # if experience_str:
+                    #     try:
+                    #         experience = int(experience_str)
+                    #     except ValueError:
+                    #         current_app.logger.warn(f"Valor de experiência inválido para atividade {activity_id}: {experience_str}")
+
+
+                    prof_activity = ProfessionalActivity(
+                        professional_id=new_professional.id,
+                        activity_id=activity.id, # Usar o ID da atividade validada
+                        description=description,
+                        price=price
+                        # availability=availability_str,
+                        # experience_years=experience # Adicionar se o campo existir no modelo ProfessionalActivity
+                    )
+                    db.session.add(prof_activity)
+                except ValueError:
+                    current_app.logger.warn(f"ID de atividade inválido (não é um inteiro): {activity_id_str}")
+                    continue # Pula para o próximo ID de atividade
         
-        # Se não houver atividades, criar pelo menos uma atividade padrão
-        if not activities:
-            # Adicionar atividade padrão baseada na categoria
-            category_id = data.get('category_id')
-            if category_id:
-                # Criar uma atividade padrão para o profissional
-                prof_activity = ProfessionalActivity(
-                    professional_id=new_professional.id,
-                    activity_name=f"Serviço de {new_user.name}",
-                    description=data.get('bio', 'Serviço profissional'),
-                    experience_years=0,
-                    price=0
-                )
-                db.session.add(prof_activity)
-        else:
-            # Processar atividades enviadas
-            for i, activity_name in enumerate(activities):
-                # Adicionar atividade ao profissional
-                prof_activity = ProfessionalActivity(
-                    professional_id=new_professional.id,
-                    activity_name=activity_name,
-                    description=descriptions[i] if i < len(descriptions) else None,
-                    experience_years=experience_years[i] if i < len(experience_years) else None,
-                    price=prices[i] if i < len(prices) else None
-                )
-                db.session.add(prof_activity)
-        
+        # Nota: A lógica de fallback para criar uma atividade padrão se nenhuma for fornecida foi removida
+        # conforme a especificação do Sub-task 3.2.
+
         db.session.commit()
         
         return jsonify({
@@ -245,21 +270,4 @@ def register_patient():
     except Exception as e:
         db.session.rollback()
         return jsonify({'error': str(e)}), 500
-
-@auth_bp.route('/activities', methods=['GET'])
-def get_activities():
-    try:
-        # Verificar se a tabela existe
-        inspector = db.inspect(db.engine)
-        if 'activities' not in inspector.get_table_names():
-            return jsonify([]), 200
-            
-        activities = Activity.query.all()
-        return jsonify([{
-            'id': activity.id,
-            'name': activity.name,
-            'description': activity.description,
-            'category': activity.category_id
-        } for activity in activities]), 200
-    except Exception as e:
-        return jsonify({'error': str(e)}), 500
+# The /activities route has been removed from auth_bp as per subtask 4.3

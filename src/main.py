@@ -5,6 +5,7 @@ from src.routes.patient import patient_bp
 from src.routes.professional import professional_bp
 from src.routes.search import search_bp
 from src.routes.professional_activity import activity_bp
+from src.routes.admin import admin_bp # Import the admin blueprint
 from src.models.user import db
 import os
 
@@ -42,6 +43,7 @@ app.register_blueprint(patient_bp, url_prefix='/api/patient')
 app.register_blueprint(professional_bp, url_prefix='/api/professional')
 app.register_blueprint(search_bp, url_prefix='/api/search')
 app.register_blueprint(activity_bp, url_prefix='/api/activities')
+app.register_blueprint(admin_bp, url_prefix='/admin') # Register the admin blueprint
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=int(os.environ.get('PORT', 5000)))
