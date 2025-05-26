@@ -1,67 +1,28 @@
-from flask import Blueprint, request, jsonify
-from src.models.booking import Booking, db
-from src.utils.auth import token_required
+from flask_sqlalchemy import SQLAlchemy
+from datetime import datetime
+from src.models.user import db
 
-booking_bp = Blueprint('booking', __name__, url_prefix='/api/booking')
-
-@booking_bp.route('/', methods=['GET'])
-@token_required
-def list_bookings():
-    try:
-        bookings = Booking.query.all()
-        return jsonify([b.serialize() for b in bookings]), 200
-    except Exception:
-        return jsonify({'error': 'Erro ao listar agendamentos.'}), 500
-
-@booking_bp.route('/<int:id>', methods=['GET'])
-@token_required
-def get_booking(id):
-    try:
-        booking = Booking.query.get_or_404(id)
-        return jsonify(booking.serialize()), 200
-    except Exception:
-        return jsonify({'error': 'Erro ao buscar agendamento.'}), 500
-
-@booking_bp.route('/', methods=['POST'])
-@token_required
-def create_booking():
-    try:
-        data = request.json
-        new_booking = Booking(
-            patient_id=request.user_id,
-            professional_id=data['professional_id'],
-            scheduled_date=data['scheduled_date'],
-            status=data.get('status', 'pending')
-        )
-        db.session.add(new_booking)
-        db.session.commit()
-        return jsonify(new_booking.serialize()), 201
-    except Exception:
-        db.session.rollback()
-        return jsonify({'error': 'Erro ao criar agendamento.'}), 500
-
-@booking_bp.route('/<int:id>', methods=['PUT'])
-@token_required
-def update_booking(id):
-    try:
-        booking = Booking.query.get_or_404(id)
-        data = request.json
-        booking.scheduled_date = data.get('scheduled_date', booking.scheduled_date)
-        booking.status = data.get('status', booking.status)
-        db.session.commit()
-        return jsonify(booking.serialize()), 200
-    except Exception:
-        db.session.rollback()
-        return jsonify({'error': 'Erro ao atualizar agendamento.'}), 500
-
-@booking_bp.route('/<int:id>', methods=['DELETE'])
-@token_required
-def delete_booking(id):
-    try:
-        booking = Booking.query.get_or_404(id)
-        db.session.delete(booking)
-        db.session.commit()
-        return jsonify({'message': 'Agendamento deletado com sucesso.'}), 200
-    except Exception:
-        db.session.rollback()
-        return jsonify({'error': 'Erro ao deletar agendamento.'}), 500
+class Booking(db.Model):
+    __tablename__ = 'bookings'
+    
+    id = db.Column(db.Integer, primary_key=True)
+    patient_id = db.Column(db.Integer, db.ForeignKey('patients.id'), nullable=False)
+    professional_id = db.Column(db.Integer, db.ForeignKey('professionals.id'), nullable=False)
+    scheduled_date = db.Column(db.DateTime, nullable=False)
+    status = db.Column(db.String(20), nullable=False, default='pending')
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    
+    def serialize(self):
+        return {
+            'id': self.id,
+            'patient_id': self.patient_id,
+            'professional_id': self.professional_id,
+            'scheduled_date': self.scheduled_date.isoformat() if self.scheduled_date else None,
+            'status': self.status,
+            'created_at': self.created_at.isoformat() if self.created_at else None,
+            'updated_at': self.updated_at.isoformat() if self.updated_at else None
+        }
+    
+    def __repr__(self):
+        return f'<Booking {self.id} - {self.status}>'
