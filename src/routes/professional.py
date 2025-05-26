@@ -41,9 +41,34 @@ def update_professional(professional_id):
     try:
         prof = Professional.query.get_or_404(professional_id)
         data = request.json
+        if not data:
+            return jsonify({'error': 'Dados não fornecidos'}), 400
 
-        prof.bio = data.get('bio', prof.bio)
-        prof.approval_status = data.get('approval_status', prof.approval_status)
+        # Authorization logic
+        if request.user_type == 'admin':
+            if 'bio' in data:
+                prof.bio = data['bio']
+            if 'approval_status' in data:
+                # Validate approval_status if necessary (e.g., specific allowed values)
+                allowed_statuses = ['pending', 'approved', 'rejected']
+                if data['approval_status'] not in allowed_statuses:
+                    return jsonify({'error': f'Status de aprovação inválido. Valores permitidos: {allowed_statuses}'}), 400
+                prof.approval_status = data['approval_status']
+        
+        elif request.user_type == 'professional':
+            # Check if the professional is updating their own profile
+            if prof.user_id != request.user_id:
+                return jsonify({'error': 'Não autorizado a atualizar este perfil'}), 403
+            
+            if 'bio' in data:
+                prof.bio = data['bio']
+            if 'approval_status' in data:
+                # Professionals cannot change their own approval status
+                return jsonify({'error': 'Você não tem permissão para alterar o status de aprovação.'}), 403
+        
+        else:
+            # Other user types are not authorized
+            return jsonify({'error': 'Não autorizado'}), 403
 
         db.session.commit()
         return jsonify({'message': 'Profissional atualizado com sucesso!'}), 200
