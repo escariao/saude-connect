@@ -1,22 +1,14 @@
 import pytest
-from flask import Flask
-from src import create_app  # Ajuste conforme como você instancia a app
-from src.models.user import db, User
+# Removed Flask import as create_app is no longer used here
+# from src import create_app # Removed local create_app import
+from src.main import db # Corrected db import based on conftest.py
+from src.models.user import User
 import json
 
-@pytest.fixture
-def client():
-    app = create_app()
-    app.config['TESTING'] = True
-    app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///:memory:'
-    
-    with app.app_context():
-        db.create_all()
-        yield app.test_client()
-        db.drop_all()
+# Removed local client fixture, conftest.py client will be used
 
-def test_register_patient_success(client):
-    response = client.post('/register/patient', json={
+def test_register_patient_success(client): # client is now from conftest.py
+    response = client.post('/api/auth/register/patient', json={ # Updated URL
         'email': 'test@example.com',
         'password': '123456',
         'name': 'Test User',
@@ -27,7 +19,7 @@ def test_register_patient_success(client):
     assert 'user_id' in data
 
 def test_register_patient_missing_fields(client):
-    response = client.post('/register/patient', json={
+    response = client.post('/api/auth/register/patient', json={ # Updated URL
         'email': 'test@example.com'
     })
     assert response.status_code == 400
@@ -35,14 +27,14 @@ def test_register_patient_missing_fields(client):
     assert 'error' in data
 
 def test_register_patient_duplicate_email(client):
-    client.post('/register/patient', json={
+    client.post('/api/auth/register/patient', json={ # Updated URL
         'email': 'test@example.com',
         'password': '123456',
         'name': 'Test User',
         'document': '12345678900'
     })
     
-    response = client.post('/register/patient', json={
+    response = client.post('/api/auth/register/patient', json={ # Updated URL
         'email': 'test@example.com',
         'password': '123456',
         'name': 'Test User',
@@ -55,14 +47,14 @@ def test_register_patient_duplicate_email(client):
 
 def test_login_success(client):
     # Primeiro, criar usuário
-    client.post('/register/patient', json={
+    client.post('/api/auth/register/patient', json={ # Updated URL
         'email': 'login@example.com',
         'password': '123456',
         'name': 'Login User',
         'document': '12345678900'
     })
 
-    response = client.post('/login', json={
+    response = client.post('/api/auth/login', json={ # Updated URL
         'email': 'login@example.com',
         'password': '123456'
     })
@@ -71,14 +63,14 @@ def test_login_success(client):
     assert 'token' in data
 
 def test_login_incorrect_password(client):
-    client.post('/register/patient', json={
+    client.post('/api/auth/register/patient', json={ # Updated URL
         'email': 'loginfail@example.com',
         'password': '123456',
         'name': 'Login Fail',
         'document': '12345678900'
     })
 
-    response = client.post('/login', json={
+    response = client.post('/api/auth/login', json={ # Updated URL
         'email': 'loginfail@example.com',
         'password': 'wrongpass'
     })
@@ -87,7 +79,7 @@ def test_login_incorrect_password(client):
     assert 'message' in data
 
 def test_login_missing_fields(client):
-    response = client.post('/login', json={})
+    response = client.post('/api/auth/login', json={}) # Updated URL
     assert response.status_code == 400
     data = response.get_json()
     assert 'message' in data

@@ -1,41 +1,40 @@
 import pytest
-from flask import Flask
-from src import create_app
-from src.models.user import db, User
+# Removed Flask and create_app imports
+from src.main import db # Corrected db import
+from src.models.user import User # Assuming User model is still relevant
+from src.models.booking import Booking # Added Booking model import based on usage
 import json
 import jwt
 from datetime import datetime, timedelta
+from flask import current_app # To access app config for SECRET_KEY
 
-@pytest.fixture
-def client():
-    app = create_app()
-    app.config['TESTING'] = True
-    app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///:memory:'
-    app.config['SECRET_KEY'] = 'test_secret'
-    
-    with app.app_context():
-        db.create_all()
-        yield app.test_client()
-        db.drop_all()
+# Removed local client fixture
 
-def generate_token(user_id, user_type='patient', secret='test_secret'):
+def generate_token(user_id, user_type='patient'): # Removed hardcoded secret
     payload = {
         'user_id': user_id,
         'user_type': user_type,
         'exp': datetime.utcnow() + timedelta(days=1)
     }
+    # Use SECRET_KEY from app config, ensuring consistency
+    secret = current_app.config.get('SECRET_KEY', 'test_secret_key_for_conftest')
     return jwt.encode(payload, secret, algorithm='HS256')
 
 @pytest.fixture
-def auth_headers(client):
+def auth_headers(client): # client is from conftest.py
     # Criar usuário
-    response = client.post('/register/patient', json={
+    # Ensure db session is active if User creation hits db before request
+    # This might be handled by app_context in conftest client
+    response = client.post('/api/auth/register/patient', json={ # Updated URL
         'email': 'bookinguser@example.com',
         'password': '123456',
         'name': 'Booking User',
         'document': '12345678900'
     })
-    user_id = response.get_json()['user_id']
+    user_data = response.get_json()
+    if response.status_code != 201:
+        raise Exception(f"Failed to register user for auth_headers: {response.status_code} {user_data.get('message') or user_data.get('error')}")
+    user_id = user_data['user_id']
     
     token = generate_token(user_id)
     if isinstance(token, bytes):
@@ -44,10 +43,12 @@ def auth_headers(client):
     return {'Authorization': f'Bearer {token}'}
 
 def test_create_booking(client, auth_headers):
+    # Ensure a professional user exists for professional_id = 1, or adjust test data
+    # For now, assuming professional_id=1 is valid or will be handled by other test setups.
     response = client.post('/api/booking/', 
         headers=auth_headers,
         json={
-            'professional_id': 1,
+            'professional_id': 1, # This professional needs to exist
             'scheduled_date': '2023-12-31T10:00:00',
             'status': 'pending'
         })

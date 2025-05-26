@@ -1,37 +1,29 @@
 import pytest
 import jwt
 from datetime import datetime, timedelta
-from src import create_app
-from src.models.user import db, User
+from src.main import db # Corrected db import based on conftest.py
+from src.models.user import User
 from src.models.category import Category
 
-@pytest.fixture
-def client():
-    app = create_app()
-    app.config['TESTING'] = True
-    app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///:memory:'
-    app.config['SECRET_KEY'] = 'test_secret'
-    
-    with app.app_context():
-        db.create_all()
-        yield app.test_client()
-        db.drop_all()
+# Removed local client fixture
 
-def generate_admin_token(user_id, secret='test_secret'):
+def generate_admin_token(user_id, secret='test_secret_key_for_conftest'): # Ensure secret matches conftest
     payload = {
         'user_id': user_id,
         'user_type': 'admin',
         'exp': datetime.utcnow() + timedelta(days=1)
     }
+    # Ensure the secret used here matches the one in conftest.py or your app's config for testing
     return jwt.encode(payload, secret, algorithm='HS256')
 
 @pytest.fixture
-def admin_headers(client):
+def admin_headers(client): # client fixture is now from conftest.py
+    # Assuming db operations are safe within app_context managed by conftest client
     admin = User(email='admin@example.com', password='123456', name='Admin', user_type='admin')
     db.session.add(admin)
     db.session.commit()
     
-    token = generate_admin_token(admin.id)
+    token = generate_admin_token(admin.id) 
     if isinstance(token, bytes):
         token = token.decode('utf-8')
         
