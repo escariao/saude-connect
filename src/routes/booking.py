@@ -1,6 +1,7 @@
 from flask import Blueprint, request, jsonify
-from src.models.booking import Booking, db
-from src.utils.auth import token_required
+from ..models.booking import Booking, db # Changed to relative import
+from ..utils.auth import token_required # Changed to relative import
+from datetime import datetime # Added import for datetime parsing
 
 booking_bp = Blueprint('booking', __name__, url_prefix='/api/booking')
 
@@ -30,7 +31,7 @@ def create_booking():
         new_booking = Booking(
             patient_id=request.user_id,
             professional_id=data['professional_id'],
-            scheduled_date=data['scheduled_date'],
+            date_time=datetime.fromisoformat(data['scheduled_date']), # Corrected field name and parse string to datetime
             status=data.get('status', 'pending')
         )
         db.session.add(new_booking)
@@ -46,7 +47,8 @@ def update_booking(id):
     try:
         booking = Booking.query.get_or_404(id)
         data = request.json
-        booking.scheduled_date = data.get('scheduled_date', booking.scheduled_date)
+        if 'scheduled_date' in data: # Check if scheduled_date is provided for update
+            booking.date_time = datetime.fromisoformat(data['scheduled_date']) # Update date_time field
         booking.status = data.get('status', booking.status)
         db.session.commit()
         return jsonify(booking.serialize()), 200

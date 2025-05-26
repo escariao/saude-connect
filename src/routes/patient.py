@@ -1,7 +1,7 @@
 from flask import Blueprint, request, jsonify
-from src.models.user import db
-from src.models.patient import Patient
-from src.utils.auth import token_required
+from ..models.user import db # Changed to relative import
+from ..models.patient import Patient # Changed to relative import
+from ..utils.auth import token_required # Changed to relative import
 
 patient_bp = Blueprint('patient', __name__, url_prefix='/api/patient')
 

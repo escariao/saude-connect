@@ -1,6 +1,6 @@
 from flask import Blueprint, request, jsonify
-from src.models.professional import Professional, db
-from src.utils.auth import token_required
+from ..models.professional import Professional, db # Changed to relative import
+from ..utils.auth import token_required # Changed to relative import
 
 professional_bp = Blueprint('professional', __name__, url_prefix='/api/professional')
 

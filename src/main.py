@@ -1,14 +1,17 @@
-import os
+import os # Keep os import for configurations
 from flask import Flask, send_from_directory
-from src.models.user import db  # db instance
-from src.routes.auth import auth_bp
-from src.routes.booking import booking_bp
-from src.routes.patient import patient_bp
-from src.routes.professional import professional_bp
-from src.routes.professional_activity import professional_activity_bp
-from src.routes.search import search_bp
-from src.routes.user import user_bp
-from src.routes.admin import admin_bp # Added import for admin_bp
+# Removed sys.path modification block
+
+# Changed to relative imports
+from .models.user import db  # db instance
+from .routes.auth import auth_bp
+from .routes.booking import booking_bp
+from .routes.patient import patient_bp
+from .routes.professional import professional_bp
+from .routes.professional_activity import professional_activity_bp
+from .routes.search import search_bp
+from .routes.user import user_bp
+from .routes.admin import admin_bp
 
 # Application Factory Function
 def create_app(config_object=None):

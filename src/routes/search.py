@@ -1,9 +1,9 @@
 from flask import Blueprint, request, jsonify
 from sqlalchemy import exc
-from src.models.user import User, db
-from src.models.professional import Professional, Activity, ProfessionalActivity
-from src.models.category import Category
-from src.utils.auth import token_required
+from ..models.user import User, db # Changed to relative import
+from ..models.professional import Professional, Activity, ProfessionalActivity # Changed to relative import
+from ..models.category import Category # Changed to relative import
+from ..utils.auth import token_required # Changed to relative import
 
 search_bp = Blueprint('search', __name__, url_prefix='/api/search')
 

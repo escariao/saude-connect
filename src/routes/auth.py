@@ -6,8 +6,8 @@ from datetime import datetime, timedelta
 from flask import Blueprint, request, jsonify, current_app
 from werkzeug.security import generate_password_hash, check_password_hash
 from werkzeug.utils import secure_filename
-from src.models.user import db, User
-from src.models.professional import Professional, Activity, ProfessionalActivity
+from ..models.user import db, User # Changed to relative import
+from ..models.professional import Professional, Activity, ProfessionalActivity # Changed to relative import
 
 auth_bp = Blueprint('auth', __name__)
 
@@ -188,7 +188,7 @@ def register_patient():
         db.session.add(new_user)
         db.session.flush()
 
-        from src.models.patient import Patient
+        from ..models.patient import Patient # Changed to relative import
 
         # Use 'document' from data, fallback to 'document_number' if 'document' is not present, then "Não informado"
         document_data = data.get('document') or data.get('document_number') or "Não informado"

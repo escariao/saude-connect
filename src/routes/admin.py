@@ -1,6 +1,6 @@
 from flask import Blueprint, request, jsonify, current_app # Added current_app
-from src.models.user import db
-from src.models.category import Category
+from ..models.user import db # Changed to relative import
+from ..models.category import Category # Changed to relative import
 from functools import wraps
 import jwt
 # import os # os is no longer needed for SECRET_KEY here

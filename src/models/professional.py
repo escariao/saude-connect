@@ -1,6 +1,6 @@
 
-from src.models.user import db
-from src.models.professional_activity import ProfessionalActivity
+from .user import db # Changed to relative import
+from .professional_activity import ProfessionalActivity # Changed to relative import
 from datetime import datetime
 
 class Professional(db.Model):

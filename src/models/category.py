@@ -1,4 +1,4 @@
-from src.models.user import db
+from .user import db # Changed to relative import
 
 class Category(db.Model):
     __tablename__ = 'categories'

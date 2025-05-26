@@ -1,7 +1,6 @@
-
-from flask_sqlalchemy import SQLAlchemy
+# Removed flask_sqlalchemy import as db is imported from user
 from datetime import datetime
-from src.models.user import db
+from .user import db # Changed to relative import
 
 class Booking(db.Model):
     __tablename__ = 'bookings'
