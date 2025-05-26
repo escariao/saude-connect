@@ -26,7 +26,8 @@ def auth_headers(client): # client is from conftest.py
         'email': 'search@example.com',
         'password': '123456',
         'name': 'Search User',
-        'document': '12345678900'
+        'document': '12345678900',
+        'phone': '1234567890' # Added phone
     })
     user_data = response.get_json()
     if response.status_code != 201:

@@ -1,9 +1,9 @@
-from flask import Blueprint, request, jsonify
+from flask import Blueprint, request, jsonify, current_app # Added current_app
 from src.models.user import db
 from src.models.category import Category
 from functools import wraps
 import jwt
-import os
+# import os # os is no longer needed for SECRET_KEY here
 
 admin_bp = Blueprint('admin', __name__)
 
@@ -24,11 +24,17 @@ def admin_required(f):
             return jsonify({'error': 'Token não fornecido'}), 401
 
         try:
-            data = jwt.decode(token, os.environ.get('SECRET_KEY', 'asdf#FGSgvasgf$5$WGT'), algorithms=["HS256"])
+            # Use the app's configured SECRET_KEY for consistency
+            secret_key = current_app.config['SECRET_KEY'] 
+            data = jwt.decode(token, secret_key, algorithms=["HS256"])
             if data['user_type'] != 'admin':
                 return jsonify({'error': 'Acesso restrito a administradores'}), 403
-        except:
-            return jsonify({'error': 'Token inválido ou expirado'}), 401
+        except jwt.ExpiredSignatureError:
+            return jsonify({'error': 'Token expirado'}), 401
+        except jwt.InvalidTokenError:
+            return jsonify({'error': 'Token inválido'}), 401
+        except Exception: # Catching a broader exception here just in case
+            return jsonify({'error': 'Erro na validação do token'}), 401
 
         return f(*args, **kwargs)
     return decorated

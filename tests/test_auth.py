@@ -12,7 +12,8 @@ def test_register_patient_success(client): # client is now from conftest.py
         'email': 'test@example.com',
         'password': '123456',
         'name': 'Test User',
-        'document': '12345678900'
+            'document': '12345678900',
+            'phone': '1234567890' # Added phone
     })
     assert response.status_code == 201
     data = response.get_json()
@@ -51,7 +52,8 @@ def test_login_success(client):
         'email': 'login@example.com',
         'password': '123456',
         'name': 'Login User',
-        'document': '12345678900'
+            'document': '12345678900',
+            'phone': '1234567890' # Added phone
     })
 
     response = client.post('/api/auth/login', json={ # Updated URL
@@ -67,7 +69,8 @@ def test_login_incorrect_password(client):
         'email': 'loginfail@example.com',
         'password': '123456',
         'name': 'Login Fail',
-        'document': '12345678900'
+            'document': '12345678900',
+            'phone': '1234567890' # Added phone (already present from previous diff, correct)
     })
 
     response = client.post('/api/auth/login', json={ # Updated URL

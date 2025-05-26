@@ -8,6 +8,7 @@ from src.routes.professional import professional_bp
 from src.routes.professional_activity import professional_activity_bp
 from src.routes.search import search_bp
 from src.routes.user import user_bp
+from src.routes.admin import admin_bp # Added import for admin_bp
 
 # Application Factory Function
 def create_app(config_object=None):
@@ -35,6 +36,7 @@ def create_app(config_object=None):
     app.register_blueprint(professional_activity_bp, url_prefix='/api/professional_activity')
     app.register_blueprint(search_bp, url_prefix='/api/search')
     app.register_blueprint(user_bp, url_prefix='/api/user')
+    app.register_blueprint(admin_bp, url_prefix='/api/admin') # Registered admin_bp
 
     # Main routes
     @app.route('/')

@@ -164,7 +164,7 @@ def register_patient():
         else:
             return jsonify({'error': 'Formato de dados inválido. Envie JSON ou formulário.'}), 400
 
-        required_fields = ['email', 'password', 'name', 'document']
+        required_fields = ['email', 'password', 'name', 'document', 'phone'] # Added 'phone'
         for field in required_fields:
             if not data.get(field):
                 return jsonify({'error': f'O campo {field} é obrigatório'}), 400
@@ -190,7 +190,10 @@ def register_patient():
 
         from src.models.patient import Patient
 
-        document_number = data.get('document_number') or data['document'] or "Não informado"
+        # Use 'document' from data, fallback to 'document_number' if 'document' is not present, then "Não informado"
+        document_data = data.get('document') or data.get('document_number') or "Não informado"
+        patient_phone = data.get('phone') # Already checked in required_fields
+
         birth_date = None
         if data.get('birth_date'):
             for fmt in ('%Y-%m-%d', '%d/%m/%Y'):
@@ -202,7 +205,8 @@ def register_patient():
 
         new_patient = Patient(
             user_id=new_user.id,
-            document_number=document_number,
+            phone=patient_phone,  # Populate the Patient's phone field
+            document=document_data, # Correct field name for Patient model
             birth_date=birth_date,
             address=data.get('address', ''),
             city=data.get('city', ''),
