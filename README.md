@@ -6,8 +6,8 @@
 ![Version](https://img.shields.io/badge/version-1.0.0-yellow)
 
 ## 📝 Descrição
-
-
+X  
+  
 ## 💻 Tecnologias Utilizadas
 - Python 3.11
 - Flask
