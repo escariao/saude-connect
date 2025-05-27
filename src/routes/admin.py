@@ -3,8 +3,55 @@ from src.models.user import User, db
 from src.models.professional import Professional, Activity
 from src.models.professional_activity import ProfessionalActivity # For checking usage in delete_activity
 from src.models.category import Category
-from src.utils.auth import admin_required
+# from src.utils.auth import admin_required # Removed as per task
 from datetime import datetime
+from functools import wraps
+import jwt
+import os 
+from flask import current_app
+
+# Middleware para verificar se o usuário é administrador
+def admin_required(f):
+    @wraps(f)
+    def decorated(*args, **kwargs):
+        token = None
+        auth_header = request.headers.get('Authorization') # More robust way to get header
+
+        if auth_header and auth_header.startswith('Bearer '):
+            try:
+                token = auth_header.split(" ")[1]
+            except IndexError:
+                return jsonify({'error': 'Formato de token inválido. Use "Bearer <token>"'}), 401
+        
+        if not token:
+            return jsonify({'error': 'Token de autenticação não fornecido ou malformado'}), 401
+
+        try:
+            # Use current_app.config for SECRET_KEY
+            secret_key = current_app.config.get('SECRET_KEY')
+            if not secret_key:
+                # Fallback if not set in app config, though it should be
+                secret_key = os.environ.get('SECRET_KEY', 'dev_secret_key_for_testing')
+
+            data = jwt.decode(token, secret_key, algorithms=["HS256"])
+            
+            # Ensure 'user_type' is in the token payload
+            if 'user_type' not in data:
+                return jsonify({'error': 'Token inválido: user_type ausente'}), 401
+
+            if data['user_type'] != 'admin':
+                return jsonify({'error': 'Acesso restrito a administradores'}), 403
+        except jwt.ExpiredSignatureError:
+            return jsonify({'error': 'Token expirado'}), 401
+        except jwt.InvalidTokenError: # Catches various JWT errors like invalid signature, malformed token
+            return jsonify({'error': 'Token inválido ou malformado'}), 401
+        except Exception as e: # Catch any other unexpected errors during token decoding
+            # It's good to log this error on the server side for debugging
+            # print(f"Unexpected error during token decoding: {e}") 
+            return jsonify({'error': 'Erro interno ao processar token'}), 500
+            
+        return f(*args, **kwargs)
+    return decorated
 
 admin_bp = Blueprint('admin', __name__, url_prefix='/admin')
 
