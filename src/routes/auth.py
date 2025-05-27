@@ -14,7 +14,15 @@ auth_bp = Blueprint('auth', __name__)
 @auth_bp.route('/login', methods=['POST'])
 def login():
     try:
-        data = request.get_json()
+        # Verificar se a requisição é JSON
+        if not request.is_json:
+            # Tentar obter dados do formulário se não for JSON
+            if request.form:
+                data = request.form.to_dict()
+            else:
+                return jsonify({'message': 'Formato de dados inválido. Envie JSON ou formulário.'}), 400
+        else:
+            data = request.get_json()
         
         if not data or not data.get('email') or not data.get('password'):
             return jsonify({'message': 'Dados de login incompletos'}), 400
@@ -222,7 +230,7 @@ def register_patient():
             email=data.get('email'),
             password=generate_password_hash(data.get('password')),
             name=data.get('name'),
-            phone=data.get('phone'),
+            phone=data.get('phone', ''),
             user_type='patient'
         )
         
@@ -232,11 +240,6 @@ def register_patient():
         # Importar Patient aqui para evitar importação circular
         from src.models.patient import Patient
         
-        # Garantir que document_number não seja nulo
-        document_number = data.get('document_number', data.get('document', ''))
-        if not document_number:
-            document_number = "Não informado"
-            
         # Processar data de nascimento
         birth_date = None
         if data.get('birth_date'):
@@ -249,10 +252,11 @@ def register_patient():
                 except ValueError:
                     birth_date = None
         
-        # Criar perfil de paciente
+        # Criar perfil de paciente - usando document em vez de document_number
         new_patient = Patient(
             user_id=new_user.id,
-            document_number=document_number,
+            document=data.get('document', 'Não informado'),
+            phone=data.get('phone', ''),
             birth_date=birth_date,
             address=data.get('address', ''),
             city=data.get('city', ''),

@@ -1,4 +1,3 @@
-
 from src.models.user import db
 from src.models.professional_activity import ProfessionalActivity
 from datetime import datetime
@@ -8,8 +7,8 @@ class Professional(db.Model):
     
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
-    document_number = db.Column(db.String(20), nullable=False)  # CPF ou documento profissional
-    diploma_file = db.Column(db.String(255), nullable=False)  # Caminho para o arquivo do diploma
+    document_number = db.Column(db.String(50), nullable=False)  # CPF ou documento profissional - aumentado para 50
+    diploma_file = db.Column(db.Text, nullable=False)  # Caminho para o arquivo do diploma - alterado para Text
     bio = db.Column(db.Text, nullable=True)
     approval_status = db.Column(db.String(20), default='pending')  # pending, approved, rejected
     approval_date = db.Column(db.DateTime, nullable=True)

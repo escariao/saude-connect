@@ -50,8 +50,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 name: document.getElementById('name').value,
                 email: document.getElementById('email').value,
                 password: passwordInput.value,
-                document: document.getElementById('document-number').value,
-                document_number: document.getElementById('document-number').value, // Garantir que ambos os campos sejam enviados
+                document: document.getElementById('document-number').value, // Usar apenas document
                 phone: document.getElementById('phone').value,
                 birth_date: document.getElementById('birth-date').value,
                 address: document.getElementById('address').value,
