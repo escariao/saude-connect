@@ -128,27 +128,27 @@ def get_professional_details(professional_id):
             return jsonify({'error': 'Usuário não encontrado'}), 404
 
         activities_data = []
-            for pa in prof.activities: # pa is a ProfessionalActivity instance
-                activity_model = Activity.query.get(pa.activity_id)
-                category_name = None
-                activity_global_description = ''
+        for pa in prof.activities: # pa is a ProfessionalActivity instance
+            activity_model = Activity.query.get(pa.activity_id)
+            category_name = None
+            activity_global_description = ''
 
-                if activity_model:
-                    activity_global_description = activity_model.description if activity_model.description else ''
-                    if activity_model.category_id:
-                        category_model = Category.query.get(activity_model.category_id)
-                        if category_model:
-                            category_name = category_model.name
-                
+            if activity_model:
+                activity_global_description = activity_model.description if activity_model.description else ''
+                if activity_model.category_id:
+                    category_model = Category.query.get(activity_model.category_id)
+                    if category_model:
+                        category_name = category_model.name
+            
             activity_data = {
-                    'professional_activity_id': pa.id,
-                    'activity_id': pa.activity_id,
-                    'activity_name': activity_model.name if activity_model else 'Atividade Desconhecida',
-                    'activity_description': activity_global_description,
-                    'professional_description': pa.description,
-                    'price': pa.price,
-                    'availability': pa.availability, # Assuming pa has availability from ProfessionalActivity model
-                    'category': category_name
+                'professional_activity_id': pa.id,
+                'activity_id': pa.activity_id,
+                'activity_name': activity_model.name if activity_model else 'Atividade Desconhecida',
+                'activity_description': activity_global_description,
+                'professional_description': pa.description,
+                'price': pa.price,
+                'availability': pa.availability, # Assuming pa has availability from ProfessionalActivity model
+                'category': category_name
             }
             activities_data.append(activity_data)
 
