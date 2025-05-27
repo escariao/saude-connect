@@ -109,7 +109,7 @@ def register_professional():
             email=data.get('email'),
             password=generate_password_hash(data.get('password')),
             name=data.get('name'),
-            phone=data.get('phone'),
+            phone=data.get('phone', ''),
             user_type='professional'
         )
         
@@ -121,12 +121,17 @@ def register_professional():
         if not document_number:
             document_number = "Não informado"
         
+        # Limitar o tamanho da biografia para evitar erros de truncamento
+        bio = data.get('bio', '')
+        if bio and len(bio) > 1000:  # Limitar a 1000 caracteres
+            bio = bio[:1000]
+        
         # Criar perfil profissional
         new_professional = Professional(
             user_id=new_user.id,
             document_number=document_number,
             diploma_file=unique_filename,
-            bio=data.get('bio', ''),
+            bio=bio,
             approval_status='pending'
         )
         
@@ -137,8 +142,6 @@ def register_professional():
         activity_ids = request.form.getlist('activity_ids[]')
         activity_descriptions = request.form.getlist('activity_descriptions[]')
         activity_prices = request.form.getlist('activity_prices[]')
-        # availability = request.form.getlist('activity_availabilities[]') # Assuming availability is also per activity
-        # experience_years = request.form.getlist('activity_experience_years[]') # Assuming experience is also per activity
 
         if activity_ids:
             for i, activity_id_str in enumerate(activity_ids):
@@ -146,50 +149,30 @@ def register_professional():
                     activity_id = int(activity_id_str)
                     activity = Activity.query.get(activity_id)
                     if not activity:
-                        # Opção: Logar um aviso, ignorar, ou retornar erro
-                        # Para este exemplo, vamos ignorar atividades inválidas silenciosamente,
-                        # mas em produção, um erro ou log seria melhor.
                         current_app.logger.warn(f"Tentativa de registrar atividade com ID inválido: {activity_id_str}")
                         continue
 
                     # Coletar detalhes específicos da atividade para este profissional
                     description = activity_descriptions[i] if i < len(activity_descriptions) else None
                     price_str = activity_prices[i] if i < len(activity_prices) else None
-                    # availability_str = availability[i] if i < len(availability) else None
-                    # experience_str = experience_years[i] if i < len(experience_years) else None
                     
                     price = None
                     if price_str:
                         try:
                             price = float(price_str)
                         except ValueError:
-                            # Logar erro de conversão de preço
                             current_app.logger.warn(f"Valor de preço inválido para atividade {activity_id}: {price_str}")
-                            # Decidir se deve continuar ou retornar erro
-                    
-                    # experience = None
-                    # if experience_str:
-                    #     try:
-                    #         experience = int(experience_str)
-                    #     except ValueError:
-                    #         current_app.logger.warn(f"Valor de experiência inválido para atividade {activity_id}: {experience_str}")
-
 
                     prof_activity = ProfessionalActivity(
                         professional_id=new_professional.id,
-                        activity_id=activity.id, # Usar o ID da atividade validada
+                        activity_id=activity.id,
                         description=description,
                         price=price
-                        # availability=availability_str,
-                        # experience_years=experience # Adicionar se o campo existir no modelo ProfessionalActivity
                     )
                     db.session.add(prof_activity)
                 except ValueError:
                     current_app.logger.warn(f"ID de atividade inválido (não é um inteiro): {activity_id_str}")
-                    continue # Pula para o próximo ID de atividade
-        
-        # Nota: A lógica de fallback para criar uma atividade padrão se nenhuma for fornecida foi removida
-        # conforme a especificação do Sub-task 3.2.
+                    continue
 
         db.session.commit()
         
@@ -252,15 +235,15 @@ def register_patient():
                 except ValueError:
                     birth_date = None
         
-        # Criar perfil de paciente - usando document em vez de document_number
+        # Criar perfil de paciente
         new_patient = Patient(
             user_id=new_user.id,
-            document=data.get('document', 'Não informado'),
-            phone=data.get('phone', ''),
+            document=data.get('document', ''),
             birth_date=birth_date,
             address=data.get('address', ''),
             city=data.get('city', ''),
-            state=data.get('state', '')
+            state=data.get('state', ''),
+            phone=data.get('phone', '')
         )
         
         db.session.add(new_patient)
@@ -274,4 +257,3 @@ def register_patient():
     except Exception as e:
         db.session.rollback()
         return jsonify({'error': str(e)}), 500
-# The /activities route has been removed from auth_bp as per subtask 4.3
