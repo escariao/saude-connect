@@ -1,45 +1,42 @@
-import os
-import re
-import uuid
-import jwt
-from datetime import datetime, timedelta
 from flask import Blueprint, request, jsonify, current_app
+import os
+import jwt
 from werkzeug.security import generate_password_hash, check_password_hash
 from werkzeug.utils import secure_filename
-from ..models.user import db, User # Changed to relative import
-from ..models.professional import Professional, Activity, ProfessionalActivity # Changed to relative import
+import uuid
+from datetime import datetime, timedelta
+
+from src.models.user import db, User
+from src.models.professional import Professional, Activity, ProfessionalActivity
 
 auth_bp = Blueprint('auth', __name__)
-
-UPLOAD_FOLDER = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'public', 'uploads')
-ALLOWED_EXTENSIONS = {'pdf', 'png', 'jpg', 'jpeg'}
-os.makedirs(UPLOAD_FOLDER, exist_ok=True)
-
-def allowed_file(filename):
-    return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
-
-def validate_email(email):
-    return re.match(r"[^@]+@[^@]+\.[^@]+", email)
 
 @auth_bp.route('/login', methods=['POST'])
 def login():
     try:
         data = request.get_json()
+        
         if not data or not data.get('email') or not data.get('password'):
             return jsonify({'message': 'Dados de login incompletos'}), 400
-
-        user = User.query.filter_by(email=data['email']).first()
-        if not user or not check_password_hash(user.password, data['password']):
+            
+        user = User.query.filter_by(email=data.get('email')).first()
+        
+        if not user or not check_password_hash(user.password, data.get('password')):
             return jsonify({'message': 'Email ou senha incorretos'}), 401
-
+            
+        # Gerar token JWT
         token_payload = {
             'user_id': user.id,
             'user_type': user.user_type,
             'exp': datetime.utcnow() + timedelta(days=1)
         }
-        token = jwt.encode(token_payload, current_app.config['SECRET_KEY'], algorithm='HS256')
-        token = token.decode('utf-8') if isinstance(token, bytes) else token
-
+        
+        token = jwt.encode(
+            token_payload,
+            current_app.config['SECRET_KEY'],
+            algorithm='HS256'
+        )
+        
         return jsonify({
             'token': token,
             'user': {
@@ -49,52 +46,74 @@ def login():
                 'user_type': user.user_type
             }
         }), 200
-    except Exception:
-        return jsonify({'message': 'Erro interno ao realizar login.'}), 500
+        
+    except Exception as e:
+        return jsonify({'message': f'Erro no login: {str(e)}'}), 500
+
+# Configuração para upload de arquivos
+UPLOAD_FOLDER = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'static', 'uploads')
+ALLOWED_EXTENSIONS = {'pdf', 'png', 'jpg', 'jpeg'}
+
+# Criar diretório de uploads se não existir
+os.makedirs(UPLOAD_FOLDER, exist_ok=True)
+
+def allowed_file(filename):
+    return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
 @auth_bp.route('/register/professional', methods=['POST'])
 def register_professional():
     try:
-        if not request.form or not request.files:
+        # Verificar se a requisição contém dados de formulário
+        if not request.form and not request.files:
             return jsonify({'error': 'Dados de formulário não encontrados'}), 400
-
+            
         data = request.form.to_dict()
+        
+        # Verificar campos obrigatórios
         required_fields = ['email', 'password', 'name', 'document']
         for field in required_fields:
             if not data.get(field):
                 return jsonify({'error': f'O campo {field} é obrigatório'}), 400
-
-        if not validate_email(data['email']):
-            return jsonify({'error': 'Email inválido.'}), 400
-
-        if len(data['password']) < 6:
-            return jsonify({'error': 'Senha deve ter no mínimo 6 caracteres.'}), 400
-
-        if User.query.filter_by(email=data['email']).first():
+        
+        # Verificar se o email já está em uso
+        if User.query.filter_by(email=data.get('email')).first():
             return jsonify({'error': 'Email já cadastrado'}), 400
-
-        diploma_file = request.files.get('diploma')
-        if not diploma_file or diploma_file.filename == '':
+        
+        # Verificar se o diploma foi enviado
+        if 'diploma' not in request.files:
             return jsonify({'error': 'Diploma é obrigatório'}), 400
-
+            
+        diploma_file = request.files['diploma']
+        if diploma_file.filename == '':
+            return jsonify({'error': 'Nenhum arquivo selecionado'}), 400
+            
         if not allowed_file(diploma_file.filename):
             return jsonify({'error': 'Formato de arquivo não permitido. Use PDF, PNG, JPG ou JPEG'}), 400
-
+        
+        # Salvar o arquivo com nome único
         filename = secure_filename(diploma_file.filename)
         unique_filename = f"{uuid.uuid4()}_{filename}"
-        diploma_file.save(os.path.join(UPLOAD_FOLDER, unique_filename))
-
+        file_path = os.path.join(UPLOAD_FOLDER, unique_filename)
+        diploma_file.save(file_path)
+        
+        # Criar usuário
         new_user = User(
-            email=data['email'],
-            password=generate_password_hash(data['password']),
-            name=data['name'],
+            email=data.get('email'),
+            password=generate_password_hash(data.get('password')),
+            name=data.get('name'),
             phone=data.get('phone'),
             user_type='professional'
         )
+        
         db.session.add(new_user)
-        db.session.flush()
-
-        document_number = data.get('document_number') or data['document'] or "Não informado"
+        db.session.flush()  # Para obter o ID do usuário
+        
+        # Garantir que document_number não seja nulo
+        document_number = data.get('document_number', data.get('document', ''))
+        if not document_number:
+            document_number = "Não informado"
+        
+        # Criar perfil profissional
         new_professional = Professional(
             user_id=new_user.id,
             document_number=document_number,
@@ -102,137 +121,153 @@ def register_professional():
             bio=data.get('bio', ''),
             approval_status='pending'
         )
+        
         db.session.add(new_professional)
-        db.session.flush()
+        db.session.flush()  # Para obter o ID do profissional
+        
+        # Processar atividades selecionadas pelo profissional
+        activity_ids = request.form.getlist('activity_ids[]')
+        activity_descriptions = request.form.getlist('activity_descriptions[]')
+        activity_prices = request.form.getlist('activity_prices[]')
+        # availability = request.form.getlist('activity_availabilities[]') # Assuming availability is also per activity
+        # experience_years = request.form.getlist('activity_experience_years[]') # Assuming experience is also per activity
 
-        activity_ids = request.form.getlist('activity_ids[]') # Expecting IDs now
-        descriptions = request.form.getlist('descriptions[]') # Assuming these still align by index
-        # experience_years is not a field in ProfessionalActivity model based on previous file reading.
-        # If it were, it would be: experience_years = request.form.getlist('experience_years[]')
-        prices = request.form.getlist('prices[]') # Assuming these still align by index
-        availabilities = request.form.getlist('availabilities[]') # Assuming this might be provided
-
-        # If `activity_ids` is empty, the old logic created a default activity.
-        # With activity_id being mandatory, this needs a valid ID or this block should be removed/rethought.
-        # For now, if no activity_ids are provided, no ProfessionalActivity will be created from this loop.
-        # A real application might require at least one activity or have a default general activity_id.
         if activity_ids:
             for i, activity_id_str in enumerate(activity_ids):
                 try:
                     activity_id = int(activity_id_str)
-                    # Optional: Check if Activity with this ID exists
-                    # activity = Activity.query.get(activity_id)
-                    # if not activity:
-                    #     # Handle error: activity ID not found
-                    #     continue 
+                    activity = Activity.query.get(activity_id)
+                    if not activity:
+                        # Opção: Logar um aviso, ignorar, ou retornar erro
+                        # Para este exemplo, vamos ignorar atividades inválidas silenciosamente,
+                        # mas em produção, um erro ou log seria melhor.
+                        current_app.logger.warn(f"Tentativa de registrar atividade com ID inválido: {activity_id_str}")
+                        continue
+
+                    # Coletar detalhes específicos da atividade para este profissional
+                    description = activity_descriptions[i] if i < len(activity_descriptions) else None
+                    price_str = activity_prices[i] if i < len(activity_prices) else None
+                    # availability_str = availability[i] if i < len(availability) else None
+                    # experience_str = experience_years[i] if i < len(experience_years) else None
+                    
+                    price = None
+                    if price_str:
+                        try:
+                            price = float(price_str)
+                        except ValueError:
+                            # Logar erro de conversão de preço
+                            current_app.logger.warn(f"Valor de preço inválido para atividade {activity_id}: {price_str}")
+                            # Decidir se deve continuar ou retornar erro
+                    
+                    # experience = None
+                    # if experience_str:
+                    #     try:
+                    #         experience = int(experience_str)
+                    #     except ValueError:
+                    #         current_app.logger.warn(f"Valor de experiência inválido para atividade {activity_id}: {experience_str}")
+
 
                     prof_activity = ProfessionalActivity(
                         professional_id=new_professional.id,
-                        activity_id=activity_id, # Use the new foreign key
-                        description=descriptions[i] if i < len(descriptions) else None,
-                        price=float(prices[i]) if i < len(prices) and prices[i] else None,
-                        availability=availabilities[i] if i < len(availabilities) else None
-                        # experience_years is not in ProfessionalActivity model.
+                        activity_id=activity.id, # Usar o ID da atividade validada
+                        description=description,
+                        price=price
+                        # availability=availability_str,
+                        # experience_years=experience # Adicionar se o campo existir no modelo ProfessionalActivity
                     )
                     db.session.add(prof_activity)
                 except ValueError:
-                    # Handle error: activity_id_str is not a valid integer
-                    current_app.logger.warning(f"Invalid activity_id received: {activity_id_str}")
-                    continue 
-        # else:
-            # If activities are mandatory, you might want to return an error here:
-            # return jsonify({'error': 'At least one activity ID must be provided.'}), 400
-            # Or, if there's a default activity to assign:
-            # default_activity = Activity.query.filter_by(name="General Service").first()
-            # if default_activity:
-            #     prof_activity = ProfessionalActivity(...)
-            #     db.session.add(prof_activity)
+                    current_app.logger.warn(f"ID de atividade inválido (não é um inteiro): {activity_id_str}")
+                    continue # Pula para o próximo ID de atividade
+        
+        # Nota: A lógica de fallback para criar uma atividade padrão se nenhuma for fornecida foi removida
+        # conforme a especificação do Sub-task 3.2.
 
         db.session.commit()
-        return jsonify({'message': 'Profissional cadastrado com sucesso! Aguarde a aprovação do administrador.', 'user_id': new_user.id}), 201
-    except Exception:
+        
+        return jsonify({
+            'message': 'Profissional cadastrado com sucesso! Aguarde a aprovação do administrador.',
+            'user_id': new_user.id
+        }), 201
+        
+    except Exception as e:
         db.session.rollback()
-        return jsonify({'error': 'Erro interno ao cadastrar profissional.'}), 500
+        return jsonify({'error': str(e)}), 500
 
 @auth_bp.route('/register/patient', methods=['POST'])
 def register_patient():
     try:
-        if request.is_json:
-            data = request.get_json()
-        elif request.form:
-            data = request.form.to_dict()
+        # Verificar se a requisição é JSON
+        if not request.is_json:
+            # Tentar obter dados do formulário se não for JSON
+            if request.form:
+                data = request.form.to_dict()
+            else:
+                return jsonify({'error': 'Formato de dados inválido. Envie JSON ou formulário.'}), 400
         else:
-            return jsonify({'error': 'Formato de dados inválido. Envie JSON ou formulário.'}), 400
-
-        required_fields = ['email', 'password', 'name', 'document', 'phone'] # Added 'phone'
+            data = request.get_json()
+        
+        # Verificar campos obrigatórios
+        required_fields = ['email', 'password', 'name', 'document']
         for field in required_fields:
             if not data.get(field):
                 return jsonify({'error': f'O campo {field} é obrigatório'}), 400
-
-        if not validate_email(data['email']):
-            return jsonify({'error': 'Email inválido.'}), 400
-
-        if len(data['password']) < 6:
-            return jsonify({'error': 'Senha deve ter no mínimo 6 caracteres.'}), 400
-
-        if User.query.filter_by(email=data['email']).first():
+        
+        # Verificar se o email já está em uso
+        if User.query.filter_by(email=data.get('email')).first():
             return jsonify({'error': 'Email já cadastrado'}), 400
-
+        
+        # Criar usuário
         new_user = User(
-            email=data['email'],
-            password=generate_password_hash(data['password']),
-            name=data['name'],
+            email=data.get('email'),
+            password=generate_password_hash(data.get('password')),
+            name=data.get('name'),
             phone=data.get('phone'),
             user_type='patient'
         )
+        
         db.session.add(new_user)
-        db.session.flush()
-
-        from ..models.patient import Patient # Changed to relative import
-
-        # Use 'document' from data, fallback to 'document_number' if 'document' is not present, then "Não informado"
-        document_data = data.get('document') or data.get('document_number') or "Não informado"
-        patient_phone = data.get('phone') # Already checked in required_fields
-
+        db.session.flush()  # Para obter o ID do usuário
+        
+        # Importar Patient aqui para evitar importação circular
+        from src.models.patient import Patient
+        
+        # Garantir que document_number não seja nulo
+        document_number = data.get('document_number', data.get('document', ''))
+        if not document_number:
+            document_number = "Não informado"
+            
+        # Processar data de nascimento
         birth_date = None
         if data.get('birth_date'):
-            for fmt in ('%Y-%m-%d', '%d/%m/%Y'):
+            try:
+                birth_date = datetime.strptime(data.get('birth_date'), '%Y-%m-%d').date()
+            except ValueError:
+                # Tentar outro formato se o primeiro falhar
                 try:
-                    birth_date = datetime.strptime(data['birth_date'], fmt).date()
-                    break
+                    birth_date = datetime.strptime(data.get('birth_date'), '%d/%m/%Y').date()
                 except ValueError:
-                    continue
-
+                    birth_date = None
+        
+        # Criar perfil de paciente
         new_patient = Patient(
             user_id=new_user.id,
-            phone=patient_phone,  # Populate the Patient's phone field
-            document=document_data, # Correct field name for Patient model
+            document_number=document_number,
             birth_date=birth_date,
             address=data.get('address', ''),
             city=data.get('city', ''),
             state=data.get('state', '')
         )
+        
         db.session.add(new_patient)
         db.session.commit()
-
-        return jsonify({'message': 'Paciente cadastrado com sucesso!', 'user_id': new_user.id}), 201
-    except Exception:
+        
+        return jsonify({
+            'message': 'Paciente cadastrado com sucesso!',
+            'user_id': new_user.id
+        }), 201
+        
+    except Exception as e:
         db.session.rollback()
-        return jsonify({'error': 'Erro interno ao cadastrar paciente.'}), 500
-
-@auth_bp.route('/activities', methods=['GET'])
-def get_activities():
-    try:
-        inspector = db.inspect(db.engine)
-        if 'activities' not in inspector.get_table_names():
-            return jsonify([]), 200
-
-        activities = Activity.query.all()
-        return jsonify([{
-            'id': activity.id,
-            'name': activity.name,
-            'description': activity.description,
-            'category': activity.category_id
-        } for activity in activities]), 200
-    except Exception:
-        return jsonify({'error': 'Erro ao buscar atividades.'}), 500
+        return jsonify({'error': str(e)}), 500
+# The /activities route has been removed from auth_bp as per subtask 4.3

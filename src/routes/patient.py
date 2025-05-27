@@ -1,7 +1,7 @@
 from flask import Blueprint, request, jsonify
-from ..models.user import db # Changed to relative import
-from ..models.patient import Patient # Changed to relative import
-from ..utils.auth import token_required # Changed to relative import
+from src.models.user import db
+from src.models.patient import Patient
+from src.utils.auth import token_required
 
 patient_bp = Blueprint('patient', __name__, url_prefix='/api/patient')
 
@@ -46,7 +46,6 @@ def get_patient(user_id):
 
         result = {
             'id': patient.id,
-            'user_id': patient.user_id, # Added user_id
             'phone': patient.phone,
             'document': patient.document,
             'birth_date': patient.birth_date.isoformat() if patient.birth_date else None,

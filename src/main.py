@@ -1,64 +1,49 @@
-import os # Keep os import for configurations
-from flask import Flask, send_from_directory
-# Removed sys.path modification block
+from flask import Flask
+from src.routes.auth import auth_bp
+from src.routes.booking import booking_bp
+from src.routes.patient import patient_bp
+from src.routes.professional import professional_bp
+from src.routes.search import search_bp
+from src.routes.professional_activity import activity_bp
+from src.routes.admin import admin_bp # Import the admin blueprint
+from src.models.user import db
+import os
 
-# Changed to relative imports
-from .models.user import db  # db instance
-from .routes.auth import auth_bp
-from .routes.booking import booking_bp
-from .routes.patient import patient_bp
-from .routes.professional import professional_bp
-from .routes.professional_activity import professional_activity_bp
-from .routes.search import search_bp
-from .routes.user import user_bp
-from .routes.admin import admin_bp
+app = Flask(__name__, static_folder=os.path.join(os.path.dirname(__file__), 'static'))
 
-# Application Factory Function
-def create_app(config_object=None):
-    app = Flask(__name__, static_folder=os.path.join(os.path.dirname(__file__), 'static'))
+# Configuração do banco de dados
+# Primeiro tenta usar DATABASE_URL do ambiente, se não existir, usa SQLite local
+database_url = os.environ.get('DATABASE_URL')
+if database_url:
+    # Para compatibilidade com Render (PostgreSQL)
+    if database_url.startswith('postgres://'):
+        database_url = database_url.replace('postgres://', 'postgresql://', 1)
+    app.config['SQLALCHEMY_DATABASE_URI'] = database_url
+else:
+    # Fallback para SQLite local (desenvolvimento)
+    app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///saude_connect.db'
 
-    # Configurations
-    if config_object:
-        app.config.from_object(config_object)
-    else:
-        # Default configurations if no config_object is provided
-        app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('DATABASE_URL', 'sqlite:///:memory:') # Default to in-memory for safety
-        app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', 'default_secret_key_change_me')
-    
-    app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-    # Add other default configs if necessary, e.g. app.config.from_envvar('YOURAPPLICATION_SETTINGS', silent=True)
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', 'dev_secret_key_for_testing')
 
-    # Initialize extensions
-    db.init_app(app)
+db.init_app(app)
 
-    # Register Blueprints
-    app.register_blueprint(auth_bp, url_prefix='/api/auth')
-    app.register_blueprint(booking_bp, url_prefix='/api/booking')
-    app.register_blueprint(patient_bp, url_prefix='/api/patient')
-    app.register_blueprint(professional_bp, url_prefix='/api/professional')
-    app.register_blueprint(professional_activity_bp, url_prefix='/api/professional_activity')
-    app.register_blueprint(search_bp, url_prefix='/api/search')
-    app.register_blueprint(user_bp, url_prefix='/api/user')
-    app.register_blueprint(admin_bp, url_prefix='/api/admin') # Registered admin_bp
+with app.app_context():
+    db.create_all()
 
-    # Main routes
-    @app.route('/')
-    def index():
-        return app.send_static_file('index.html')
+# Servir frontend na raiz
+@app.route('/')
+def index():
+    return app.send_static_file('activities.html')
 
-    @app.route('/<path:filename>')
-    def serve_static(filename):
-        # Ensure static_folder is correctly determined if create_app is called from elsewhere
-        # For now, assuming __file__ context is appropriate.
-        return send_from_directory(app.static_folder, filename)
-    
-    # Remove db.create_all() from here. It should be handled by migrations or test setup.
-    # Example:
-    # with app.app_context():
-    #     db.create_all() # Only if you want it to run every time app is created and not using migrations
-
-    return app
+# Blueprints
+app.register_blueprint(auth_bp, url_prefix='/api/auth')
+app.register_blueprint(booking_bp, url_prefix='/api/booking')
+app.register_blueprint(patient_bp, url_prefix='/api/patient')
+app.register_blueprint(professional_bp, url_prefix='/api/professional')
+app.register_blueprint(search_bp, url_prefix='/api/search')
+app.register_blueprint(activity_bp, url_prefix='/api/activities')
+app.register_blueprint(admin_bp, url_prefix='/admin') # Register the admin blueprint
 
 if __name__ == '__main__':
-    app = create_app()  # Create app instance using the factory
     app.run(host='0.0.0.0', port=int(os.environ.get('PORT', 5000)))

@@ -1,5 +1,6 @@
-# Removed flask_sqlalchemy import as db is imported from user
-from .user import db # Changed to relative import
+
+from flask_sqlalchemy import SQLAlchemy
+from src.models.user import db
 
 class Patient(db.Model):
     __tablename__ = 'patients'

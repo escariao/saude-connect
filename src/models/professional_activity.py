@@ -1,4 +1,4 @@
-from .user import db # Changed to relative import
+from src.models.user import db
 
 class ProfessionalActivity(db.Model):
     __tablename__ = 'professional_activities'
