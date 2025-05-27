@@ -6,7 +6,7 @@
 ![Version](https://img.shields.io/badge/version-1.0.0-yellow)
 
 ## 📝 Descrição
-Plataforma para conectar pacientes e profissionais de saúde. Inspirada no Upwork, mas especializada em atendimentos domiciliares.
+
 
 ## 💻 Tecnologias Utilizadas
 - Python 3.11
